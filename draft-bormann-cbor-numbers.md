@@ -3,7 +3,7 @@ v: 3
 
 title: On Numbers in CBOR
 abbrev: CBOR Numbers
-docname: draft-ietf-cbor-numbers-latest
+docname: draft-bormann-cbor-numbers-latest
 category: info
 stream: IETF
 
