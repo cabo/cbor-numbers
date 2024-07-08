@@ -27,9 +27,11 @@ author:
     country: Germany
     phone: +49-421-218-63921
     email: cabo@tzi.org
+contributor:
 - name: Laurence Lundblade
   org: Security Theory LLC
   email: lgl@securitytheory.com
+  contribution: Laurence wrote much of the initial text about NaN processing.
 
 normative:
   STD94: cbor
@@ -50,6 +52,16 @@ informative:
   I-D.ietf-cbor-cde: cde
   I-D.bormann-cbor-det: det
   I-D.mcnally-deterministic-cbor: dcbor-orig
+  Cplusplus20:
+    target: https://isocpp.org/files/papers/N4860.pdf
+    title: Programming languages - C++
+    author:
+    - org: International Organization for Standardization
+    date: 2020-03
+    seriesinfo:
+      ISO/IEC: ISO/IEC JTC1 SC22 WG21 N 4860
+    refcontent:
+    - Sixth Edition
 
 --- abstract
 
@@ -65,8 +77,9 @@ informative:
 
     Among the kinds of data that a data representation format needs to be
     able to carry, numbers have a prominent role, but also have
-    inherent complexity that needs attention from implementers of CBOR
-    libraries and the applications that use them.
+    inherent complexity that needs attention from protocol designers
+    and implementers of CBOR
+    libraries and of the applications that use them.
 
     This document gives an overview over number formats available in
     CBOR and some notable CBOR tags registered, and it attempts to
@@ -75,9 +88,9 @@ informative:
 
 [^disclaimer]
 
-[^disclaimer]:  This is an initial revision, pieced together from
-    various contributions, so it has a higher level of redundancy than
-    ultimately desired.
+[^disclaimer]: This is a rather drafty initial revision, pieced
+    together from various components, so it has a higher level of
+    redundancy than ultimately desired.
 
 --- middle
 
@@ -95,9 +108,10 @@ It discusses CBOR representation of numbers in four main Sections:
 
 These sections will generally address considerations such as:
 
-* Encoding efficiency (number of bytes needed)
+* Encoding efficiency (number of bytes needed), possibly processing
+  efficiency (CPU used in processing)
 * Preferred Serialization, Common Deterministic Encoding Profile (CDE,
-  {{-cde}}, with more background discussion in {{-det}})
+  {{-cde}}, see also {{-det}} for more background discussion)
 * Use by applications
 * Interoperability considerations, potential "dark corners"
 
@@ -105,7 +119,7 @@ These sections will generally address considerations such as:
 
 {::boilerplate bcp14-tagged-bcp}
 
-Terms and definitions from {{-cbor}} apply.
+Terms and definitions from {{-cbor}}, {{-cddl}}, and {{IEEE754}} apply.
 
 # Integer Numbers {#sec-int}
 
@@ -132,13 +146,16 @@ The Major type 0 numbers come in five different encoding sizes, as
 indicated by their initial byte:
 immediate ("1+0") encoding (0..23), one-byte ("1+1") (0..255),
 two-byte ("1+2", 0..65535), four-byte, and eight-byte.
-The Preferred Serialization uses the shortest of these encodings.
+The Preferred Serialization always uses the shortest of the major type
+0 encodings
+available for an unsigned integer.
 The intention is that there is no semantic difference between the
 major type 0 encodings, and there also is no semantic difference between major type 0 and
 tag 2.
-This means that Preferred Serialization can always use major type 0
-over tag 2 when possible, and the shortest encoding (and no initial
-zero bytes for the tagged encodings)
+This means that Preferred Serialization always uses major type 0
+over tag 2 when possible, and the shortest encoding of these (and thus no leading
+zero bytes for the tagged encodings).
+Major type 1 and tag 3 are analogous.
 
 Note that there is no "signed type" in CBOR: as any specific number to
 be represented is either negative or not, it is represented as an
@@ -153,7 +170,7 @@ negative numbers representable in major type 1; generic decoders will
 therefore treat the lower half of the negative space in the same way
 they will treat bignums that do not fit the signed platform type.
 Similarly, generic encoders for a platform with `u128`/`i128` types
-will choose between major type 0/1 and tag 2/3 just like it would
+will choose between major type 0/1 and tag 2/3 just like they would
 choose between the encoding sizes inside major type 0/1.
 
 While additional representation of integers could be developed, the
@@ -169,18 +186,20 @@ they can be encoded as a floating point number.
 
 There are many choices that can be made when designing a machine
 representation for floating point numbers.
-After decades of vendor-specific formats, IEEE standardized the initial
-version of {{IEEE754}} in 1985, updated in 2008 and 2019.
-This standard is widely adopted, offering choices such as binary
-vs. decimal floating point numbers, and different representation
-sizes.
-Out of the large choice available, CBOR directly supports binary16,
-binary32, and binary64, signed binary floating point formats in 16,
-32, and 64 bits, colloquially known as half (16 bits), single (32
-bits), and double (64 bits) precision.
+After decades of vendor-specific formats, IEEE standardized {{IEEE754}},
+initially in 1985, updated in 2008 and then 2019 (IEC 559 is then mirroring
+IEEE 754).
+This standard is widely adopted in hardware and software, offering
+choices such as binary vs. decimal floating point numbers, and
+different representation sizes.
+Out of the large choice available, CBOR directly supports the three
+formats binary16, binary32, and binary64, i.e., the signed binary
+floating point formats in 16, 32, and 64 bits, colloquially known as
+half (16 bits), single (32 bits), and double (64 bits) precision.
 Most platforms that support floating point computation support at
-least single precision, usually also double precision, while half
-precision is mostly used for storage and interchange only.
+least single precision, except for the most constrained ones also
+double precision, while half precision is mostly used for storage and
+interchange only and may be software-supported only.
 
 ## Integer vs. Floating Point
 
@@ -188,17 +207,17 @@ Mathematically speaking, integer numbers are a subset of the rational
 or real numbers from which floating point numbers are drawn.
 In many programming environments, however, integer numbers are clearly
 separated from floating point numbers (the most notable exception
-being the original JavaScript language).
+being the original JavaScript language, which only had one number type).
 
 For specific applications, it may be desirable to represent all
 numbers that can be represented as integers as such, even if they are
-in a position that also could be taken by a non-integer floating
-point number.  {{-dcbor-orig}} defines a CDE application profile that
-enforces this for a certain subset of the integers.
+used where floating point numbers are used for non-integers.
+{{-dcbor-orig}} defines a CDE application profile that enforces this for
+a certain subset of the integers.
 
 Most CBOR applications so far have tended to get by with the kind of
 strong separation between the integer and floating point worlds that
-programming environments usually favor, so we will not further pursue
+programming environments usually favor, so our focus will not be on
 approaches for intermingling them in this document.
 
 
@@ -212,30 +231,35 @@ IEEE754 distinguishes three kinds of floating point data item:
   interest in interchange, except that there are a few platforms with
   limited floating point support that may not support subnormal
   numbers.
-* infinite floating-point number: -Infinite or +Infinite.
+* infinite floating-point number: One of the two values −Infinite and
+  (positive) Infinite.
   On many platforms, infinite numbers can be accessed via a floating
   point operation such as 1.0/0.0 (positive infinity) or −1.0/0.0
   (negative infinity); they react to comparisons as one would expect.
-* NaN: a _floating point datum_ that is not a number (NaN), represent
-  computations that didn't lead to a numeric result, not even an
-  infinity.
+* NaN: a _floating point datum_ that is not a number (NaN), used to
+  represent computations that didn't lead to a numeric result, not
+  even an infinity.
   A commonly implemented example for such a computation is 0.0/0.0.
   The formats provide a way to include additional information with a
   NaN, such as its sign bit, whether operations on the NaN are
-  intended to fail immediately (signalling) or just return another NaN
-  (quiet), and some remaining bits that may carry additional information.
+  intended to fail immediately (signaling) or just return another NaN
+  (quiet), and some remaining bits that may carry additional
+  information (intended as diagnostic).
 
-  It can be surprising that, according to {{IEEE754}} NaN values always
+  It can be surprising that according to {{IEEE754}}, NaN values always
   compare as different even if they have the same NaN information
-  (i.e., are identical).
+  (i.e., are identical).  (There is also a totalorder relation that
+  does give NaNs a defined place, depending on their sign bits; this
+  only recently has been standardized as part of std::strong_order in
+  C++20 {{Cplusplus20}}.)
 
-Not all platforms that use IEEE 754 do provide all these kinds, e.g.,
+Not all platforms that can use IEEE 754 do provide all these kinds, e.g.,
 Erlang only provides finite floating-point numbers.
 Platforms that do provide them widely vary in the way they provide
 access to non-finite numbers and NaNs beyond the floating point
 operations given above.
 Usually there is an operation such as `isnan()` in C, which is needed
-as comparison to a NaN always yields unequal.
+as comparison to a NaN always yields inequality.
 
 ### Protocol Design Considerations
 
@@ -276,7 +300,7 @@ Additional choices can be added for the infinities (e.g., `false` and
 `true`, to stay within the CBOR simple values), if required.
 
 Since `null`, `false` and `true` have single-byte representations, the
-replacement of NaN, -Infinity, and +Infinity by these values can save
+replacement of NaN, −Infinity, and (positive) Infinity by these values can save
 bytes even if JSON compatibility is not a consideration.
 
 Applications that need to preserve the information in a NaN (sign bit,
@@ -288,7 +312,8 @@ representing those bits:
 float-with-nan-replacement = float / bytes
 
 For JSON, the byte string can be base16- or base64-encoded, or it can
-be represented by an integer, preserving its left-aligned nature.
+be represented by an integer, preserving its left-aligned nature, or
+even as a (tagged) floating point value with a different exponent.
 
 ### Implementation Considerations {#implcons}
 
@@ -325,13 +350,13 @@ What is reasonably possible depends on:
   solution.  This is specifically a problem for platform support that
   works well in most cases, but exhibits some dark corners.
   E.g., the implementation may support a single NaN value
-  consistently, but not preserving NaN information present in the NaN
+  consistently, but not preserve NaN information present in the NaN
   values.
 
 Where an implementation needs to convert between different floating
 point formats, e.g., because not all formats are fully supported by
-the platform, or to implement Preferred Serialization (including for
-Common Deterministic Encoding) in an encoder, conversion of NaNs in
+the platform, or to implement Preferred Serialization (as needed for
+Common Deterministic Encoding {{-cde}}) in an encoder, conversion of NaNs in
 these formats is best done by operating on the bit patterns of the
 {{IEEE754}} number in the following way:
 
@@ -349,10 +374,10 @@ If the contraction is optional, e.g., for Preferred Serialization, do
 not perform the contraction if the removed bits in the significand
 truncation aren't all zero.
 If the contraction is required to fit into limited platform types
-(e.g., binary32 only), a failed truncation check should be signaled to
-the application.
+(e.g., binary32 only), a failed truncation check indicates the loss of
+information and should be signaled to the application.
 We say a contraction "preserves the NaN information" if subsequent
-expansion to the original size format recreates the same NaN value.
+expansion to the original size format recreates the exact same NaN value.
 
 {{app-nan}} gives additional detailed considerations for implementations
 that aspire to provide full support for NaNs, preserving NaN information.
@@ -552,17 +577,17 @@ The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
 floating-point value.
 All of the following are NaNs.
 
-|    IEEE-754 Number |        CBOR Encoding | Comment                                         |
-| 0x7ff8000000000000 |             0xf97e00 | qNaN reduced from double to half                |
-| 0x7ff8000000000001 | 0xfb7ff8000000000001 | Can't be reduced because of bit set in payload  |
-| 0x7ffffc0000000000 |             0xf97fff | 10-bit payload that can be reduced to half      |
-| 0x7ff80000000003ff | 0xfb7ff80000000003ff | right-justified payload can't be reduced        |
-| 0x7fffffffe0000000 |         0xfa7fffffff | 23-bit payload that reduces to single           |
-| 0x7ffffffff0000000 | 0xfb7ffffffff0000000 | 24-bit payload that can't be reduced            |
-| 0x7fffffffffffffff | 0xfb7fffffffffffffff | All payload bits set                            |
-|         0x7fc00000 |             0xf97e00 | qNaN reduced from single to half                |
-|         0x7fffe000 |             0xf97fff | single 10-bit payload that can be reduced       |
-|         0x7fbff000 |         0xfa7fbff000 | single payload that can't be reduced to 10 bits |
+|    IEEE-754 Number |        CBOR Preferred Serialization | Comment                                                              |
+| 0x7ff8000000000000 |             0xf97e00     | qNaN contracted from double to half                                  |
+| 0x7ff8000000000001 | 0xfb7ff8000000000001 | Can't be contracted because of bit set in right-side part of payload |
+| 0x7ffffc0000000000 |             0xf97fff | 10-bit payload that can be contracted to half                        |
+| 0x7ff80000000003ff | 0xfb7ff80000000003ff | right-justified payload can't be contracted                          |
+| 0x7fffffffe0000000 |         0xfa7fffffff | 23-bit payload that reduces to single                                |
+| 0x7ffffffff0000000 | 0xfb7ffffffff0000000 | 24-bit payload that can't be contracted                              |
+| 0x7fffffffffffffff | 0xfb7fffffffffffffff | All payload bits set, can't be contracted                            |
+|         0x7fc00000 |             0xf97e00 | qNaN contracted from single to half                                  |
+|         0x7fffe000 |             0xf97fff | single 10-bit payload that can be contracted                         |
+|         0x7fbff000 |         0xfa7fbff000 | single payload that can't be contracted to 10 bits                   |
 {: #nan-examples title="Examples for Preferred Serialization of NaN values"}
 
 # Acknowledgments
