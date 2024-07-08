@@ -16,7 +16,7 @@ keyword:
 venue:
   group: "Concise Binary Object Representation Maintenance and Extensions"
   mail: "cbor@ietf.org"
-  github: "cabo/cbor-numbers"
+  github: cabo/cbor-numbers
 
 author:
 -   name: Carsten Bormann
