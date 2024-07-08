@@ -10,13 +10,13 @@ stream: IETF
 date:
 consensus: true
 area: "Applications and Real-Time"
-workgroup: CBOR
+workgroup: "Concise Binary Object Representation Maintenance and Extensions"
 keyword:
 
 venue:
-  group: "Concise Binary Object Representation Maintenance and Extensions (CBOR)"
+  group: "Concise Binary Object Representation Maintenance and Extensions"
   mail: "cbor@ietf.org"
-  github: cbor-wg/draft-ietf-cbor-numbers
+  github: "cabo/cbor-numbers"
 
 author:
 -   name: Carsten Bormann
