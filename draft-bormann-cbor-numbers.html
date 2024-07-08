@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>On Numbers in CBOR</title>
+<meta content="Carsten Bormann" name="author">
+<meta content="Laurence Lundblade" name="author">
+<meta content="
+       The Concise Binary Object Representation (CBOR), as defined in STD 94 (RFC 8949), is a data representation format whose design goals include the
+possibility of extremely small code size, fairly small message
+size, and extensibility without the need for version negotiation. 
+       Among the kinds of data that a data representation format needs to be
+able to carry, numbers have a prominent role, but also have
+inherent complexity that needs attention from implementers of CBOR
+libraries and the applications that use them. 
+       This document gives an overview over number formats available in
+CBOR and some notable CBOR tags registered, and it attempts to
+provide information about opportunities and potential pitfalls of these
+number formats. 
+       This is an initial revision, pieced together from
+various contributions, so it has a higher level of redundancy than
+ultimately desired. 
+    " name="description">
+<meta content="xml2rfc 3.22.0" name="generator">
+<meta content="draft-bormann-cbor-numbers-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.22.0
+    Python 3.12.3
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.4
+    lxml 4.9.4
+    platformdirs 4.2.2
+    pycountry 22.3.5
+    PyYAML 6.0.1
+    requests 2.32.3
+    setuptools 69.5.1
+    wcwidth 0.2.13
+-->
+<link href="draft-bormann-cbor-numbers.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 1;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl.olPercent {
+  --indent: 5ch;
+}
+dl > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+  margin-right: 1ch;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 2px 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 10ch;
+  margin-right: 1.5ch;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 12ch !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+  .toplink {
+    display: none;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">CBOR Numbers</td>
+<td class="right">July 2024</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Bormann &amp; Lundblade</td>
+<td class="center">Expires 9 January 2025</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Concise Binary Object Representation Maintenance and Extensions</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-bormann-cbor-numbers-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2024-07-08" class="published">8 July 2024</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2025-01-09">9 January 2025</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">C. Bormann</div>
+<div class="org">Universität Bremen TZI</div>
+</div>
+<div class="author">
+      <div class="author-name">L. Lundblade</div>
+<div class="org">Security Theory LLC</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">On Numbers in CBOR</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">The Concise Binary Object Representation (CBOR), as defined in STD 94 (RFC 8949), is a data representation format whose design goals include the
+possibility of extremely small code size, fairly small message
+size, and extensibility without the need for version negotiation.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">Among the kinds of data that a data representation format needs to be
+able to carry, numbers have a prominent role, but also have
+inherent complexity that needs attention from implementers of CBOR
+libraries and the applications that use them.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">This document gives an overview over number formats available in
+CBOR and some notable CBOR tags registered, and it attempts to
+provide information about opportunities and potential pitfalls of these
+number formats.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+<p id="section-abstract-4"><span class="cref" id="disclaimer">This is an initial revision, pieced together from
+various contributions, so it has a higher level of redundancy than
+ultimately desired.</span><a href="#section-abstract-4" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-bormann-cbor-numbers/">https://datatracker.ietf.org/doc/draft-bormann-cbor-numbers/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Concise Binary Object Representation Maintenance and Extensions Working Group mailing list (<span><a href="mailto:cbor@ietf.org">mailto:cbor@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/cbor/">https://mailarchive.ietf.org/arch/browse/cbor/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/cbor/">https://www.ietf.org/mailman/listinfo/cbor/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/cabo/cbor-numbers">https://github.com/cabo/cbor-numbers</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 9 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2024 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-integer-numbers" class="internal xref">Integer Numbers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-ieee-754-floating-point-num" class="internal xref">IEEE 754 Floating Point Numbers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-integer-vs-floating-point" class="internal xref">Integer vs. Floating Point</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-considerations-for-non-fini" class="internal xref">Considerations for non-finite numbers and non-numbers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-protocol-design-considerati" class="internal xref">Protocol Design Considerations</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-implementation-consideratio" class="internal xref">Implementation Considerations</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-other-floating-point-number" class="internal xref">Other Floating Point Numbers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-tagged-arrays-of-numbers" class="internal xref">Tagged Arrays of Numbers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implementers-checklists-for" class="internal xref">Implementers' Checklists for Floating Point Values</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-nan-payloads" class="internal xref">NaN Payloads</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.1">
+                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-nan-implementation-details" class="internal xref">NaN Implementation Details</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.2">
+                    <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-nan-tests-examples" class="internal xref">NaN Tests Examples</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The Concise Binary Object Representation (CBOR), as defined in RFC 8949 <span>[<a href="#STD94" class="cite xref">STD94</a>]</span>, is a data representation format whose design goals include the
+possibility of extremely small code size, fairly small message
+size, and extensibility without the need for version negotiation.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Among the kinds of data that a data representation format needs to be
+able to carry, numbers have a prominent role, but also have
+inherent complexity that needs attention from implementers of CBOR
+libraries and the applications that use them.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document gives an overview over number formats available in
+CBOR and some notable CBOR tags registered, and it attempts to
+provide information about opportunities and potential pitfalls of these
+number formats.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">It discusses CBOR representation of numbers in four main Sections:<a href="#section-1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-5.1">
+          <p id="section-1-5.1.1"><a href="#sec-int" class="internal xref">Integer Numbers</a> (<a href="#sec-int" class="auto internal xref">Section 2</a>),<a href="#section-1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-5.2">
+          <p id="section-1-5.2.1"><a href="#sec-ieee" class="internal xref">IEEE 754 Floating Point Numbers</a> (<a href="#sec-ieee" class="auto internal xref">Section 3</a>),<a href="#section-1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-5.3">
+          <p id="section-1-5.3.1"><a href="#sec-float" class="internal xref">Other Floating Point Numbers</a> (<a href="#sec-float" class="auto internal xref">Section 4</a>),<a href="#section-1-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-5.4">
+          <p id="section-1-5.4.1"><a href="#sec-array" class="internal xref">Tagged Arrays of Numbers</a> (<a href="#sec-array" class="auto internal xref">Section 5</a>).<a href="#section-1-5.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-6">These sections will generally address considerations such as:<a href="#section-1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-7.1">
+          <p id="section-1-7.1.1">Encoding efficiency (number of bytes needed)<a href="#section-1-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-7.2">
+          <p id="section-1-7.2.1">Preferred Serialization, Common Deterministic Encoding Profile (CDE,
+<span>[<a href="#I-D.ietf-cbor-cde" class="cite xref">I-D.ietf-cbor-cde</a>]</span>, with more background discussion in <span>[<a href="#I-D.bormann-cbor-det" class="cite xref">I-D.bormann-cbor-det</a>]</span>)<a href="#section-1-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-7.3">
+          <p id="section-1-7.3.1">Use by applications<a href="#section-1-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-7.4">
+          <p id="section-1-7.4.1">Interoperability considerations, potential "dark corners"<a href="#section-1-7.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<div id="conventions-and-definitions">
+<section id="section-1.1">
+        <h3 id="name-conventions-and-definitions">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+        </h3>
+<p id="section-1.1-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">Terms and definitions from <span>[<a href="#STD94" class="cite xref">STD94</a>]</span> apply.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-int">
+<section id="section-2">
+      <h2 id="name-integer-numbers">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-integer-numbers" class="section-name selfRef">Integer Numbers</a>
+      </h2>
+<p id="section-2-1">CBOR provides representations of integer numbers in unsigned and negative forms:<a href="#section-2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.1">
+          <p id="section-2-2.1.1">Unsigned integers up to 2<sup>64</sup>−1, major type 0<a href="#section-2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.2">
+          <p id="section-2-2.2.1">Negative integers down to −2<sup>64</sup>, major type 1<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.3">
+          <p id="section-2-2.3.1">Unsigned integers with no size limitations, tag 2 on a byte string<a href="#section-2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-2.4">
+          <p id="section-2-2.4.1">Negative integers with no size limitations, tag 3 on a byte string<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-2-3">The latter two forms are often called "bignums" for historical
+reasons, the former "basic" integers.  The Concise Data Definition
+Language (CDDL) <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span> has the types <code>uint</code>,
+<code>nint</code>, and <code>int</code>, for the ranges of values covered by major type 0,
+major type 1, and either of them, respectively; <code>biguint</code>, <code>bignint</code>,
+and <code>bigint</code> for the range of value covered by tag 2, tag3, and either;
+and <code>unsigned</code> and <code>integer</code> for a choice of either form (but
+interestingly no <code>negative</code>).
+As the preferred encoding for an integer chooses between major type
+0/1 and tag 2/3 automatically, in practice <code>biguint</code> and <code>unsigned</code>
+are the same type, as are <code>bigint</code> and <code>integer</code>.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">The Major type 0 numbers come in five different encoding sizes, as
+indicated by their initial byte:
+immediate ("1+0") encoding (0..23), one-byte ("1+1") (0..255),
+two-byte ("1+2", 0..65535), four-byte, and eight-byte.
+The Preferred Serialization uses the shortest of these encodings.
+The intention is that there is no semantic difference between the
+major type 0 encodings, and there also is no semantic difference between major type 0 and
+tag 2.
+This means that Preferred Serialization can always use major type 0
+over tag 2 when possible, and the shortest encoding (and no initial
+zero bytes for the tagged encodings)<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">Note that there is no "signed type" in CBOR: as any specific number to
+be represented is either negative or not, it is represented as an
+unsigned integer or as a negative integer.
+Major type 0 unsigned integers cover exactly the range of platform
+types such as <code>uint64_t</code> or <code>u64</code>.
+Signed platform types such as <code>int64_t</code> or <code>i64</code> can be represented in
+the lower half of the unsigned space and the upper half of the
+negative space.
+Platforms typically have no <code>nint64_t</code> type that could take all
+negative numbers representable in major type 1; generic decoders will
+therefore treat the lower half of the negative space in the same way
+they will treat bignums that do not fit the signed platform type.
+Similarly, generic encoders for a platform with <code>u128</code>/<code>i128</code> types
+will choose between major type 0/1 and tag 2/3 just like it would
+choose between the encoding sizes inside major type 0/1.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-6">While additional representation of integers could be developed, the
+options already provided by <span>[<a href="#STD94" class="cite xref">STD94</a>]</span> should be able to satisfy most
+applications.<a href="#section-2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-ieee">
+<section id="section-3">
+      <h2 id="name-ieee-754-floating-point-num">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-ieee-754-floating-point-num" class="section-name selfRef">IEEE 754 Floating Point Numbers</a>
+      </h2>
+<p id="section-3-1">While integer numbers are relatively easy to represent, floating point
+numbers as a realization of rational or real numbers are a much more
+varied subject.  Many rational or real numbers require rounding until
+they can be encoded as a floating point number.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">There are many choices that can be made when designing a machine
+representation for floating point numbers.
+After decades of vendor-specific formats, IEEE standardized the initial
+version of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> in 1985, updated in 2008 and 2019.
+This standard is widely adopted, offering choices such as binary
+vs. decimal floating point numbers, and different representation
+sizes.
+Out of the large choice available, CBOR directly supports binary16,
+binary32, and binary64, signed binary floating point formats in 16,
+32, and 64 bits, colloquially known as half (16 bits), single (32
+bits), and double (64 bits) precision.
+Most platforms that support floating point computation support at
+least single precision, usually also double precision, while half
+precision is mostly used for storage and interchange only.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<div id="integer-vs-floating-point">
+<section id="section-3.1">
+        <h3 id="name-integer-vs-floating-point">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-integer-vs-floating-point" class="section-name selfRef">Integer vs. Floating Point</a>
+        </h3>
+<p id="section-3.1-1">Mathematically speaking, integer numbers are a subset of the rational
+or real numbers from which floating point numbers are drawn.
+In many programming environments, however, integer numbers are clearly
+separated from floating point numbers (the most notable exception
+being the original JavaScript language).<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">For specific applications, it may be desirable to represent all
+numbers that can be represented as integers as such, even if they are
+in a position that also could be taken by a non-integer floating
+point number.  <span>[<a href="#I-D.mcnally-deterministic-cbor" class="cite xref">I-D.mcnally-deterministic-cbor</a>]</span> defines a CDE application profile that
+enforces this for a certain subset of the integers.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">Most CBOR applications so far have tended to get by with the kind of
+strong separation between the integer and floating point worlds that
+programming environments usually favor, so we will not further pursue
+approaches for intermingling them in this document.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="considerations-for-non-finite-numbers-and-non-numbers">
+<section id="section-3.2">
+        <h3 id="name-considerations-for-non-fini">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-considerations-for-non-fini" class="section-name selfRef">Considerations for non-finite numbers and non-numbers</a>
+        </h3>
+<p id="section-3.2-1">IEEE754 distinguishes three kinds of floating point data item:<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-2.1">
+            <p id="section-3.2-2.1.1">finite floating-point number: A finite number that is representable
+in a floating-point format.  Note that these further divide into
+zero, subnormal, and normal; this distinction is usually not of
+interest in interchange, except that there are a few platforms with
+limited floating point support that may not support subnormal
+numbers.<a href="#section-3.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-2.2">
+            <p id="section-3.2-2.2.1">infinite floating-point number: -Infinite or +Infinite.
+On many platforms, infinite numbers can be accessed via a floating
+point operation such as 1.0/0.0 (positive infinity) or −1.0/0.0
+(negative infinity); they react to comparisons as one would expect.<a href="#section-3.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-2.3">
+            <p id="section-3.2-2.3.1">NaN: a <em>floating point datum</em> that is not a number (NaN), represent
+computations that didn't lead to a numeric result, not even an
+infinity.
+A commonly implemented example for such a computation is 0.0/0.0.
+The formats provide a way to include additional information with a
+NaN, such as its sign bit, whether operations on the NaN are
+intended to fail immediately (signalling) or just return another NaN
+(quiet), and some remaining bits that may carry additional information.<a href="#section-3.2-2.3.1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2.3.2">
+It can be surprising that, according to <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> NaN values always
+compare as different even if they have the same NaN information
+(i.e., are identical).<a href="#section-3.2-2.3.2" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.2-3">Not all platforms that use IEEE 754 do provide all these kinds, e.g.,
+Erlang only provides finite floating-point numbers.
+Platforms that do provide them widely vary in the way they provide
+access to non-finite numbers and NaNs beyond the floating point
+operations given above.
+Usually there is an operation such as <code>isnan()</code> in C, which is needed
+as comparison to a NaN always yields unequal.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<div id="protocol-design-considerations">
+<section id="section-3.2.1">
+          <h4 id="name-protocol-design-considerati">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-protocol-design-considerati" class="section-name selfRef">Protocol Design Considerations</a>
+          </h4>
+<p id="section-3.2.1-1">CBOR supports the interchange of all kinds of IEEE 754 data items,
+including non-finite numbers and non-numbers (NaNs).
+For an application developer that is already using IEEE 754 floating
+point, there is little additional consideration required:
+Both infinities and NaN are widely supported in IEEE-754 hardware and
+software by CPUs, OS’s and programming environments.
+CBOR protocol designs can generally rely on infinities and NaN as a
+concept being supported, but implementations may run into dark corners
+of their platforms when it comes to distinguishing and preserving NaN
+information in NaN values.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">However, for a protocol that wants to achieve good interoperability
+over a wide variety of platforms, the fact that platforms differ in
+their support of non-finite numbers and NaNs becomes relevant.
+(See <a href="#implcons" class="auto internal xref">Section 3.2.2</a> below for reasons for such differences.)
+Protocol designs aiming for the widest possible platform support may
+want to implement replacements for infinite numbers and NaNs, or at
+least not rely on NaN information being successfully preserved during
+interchange.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<div id="json-compatibility">
+<section id="section-3.2.1.1">
+            <h5 id="name-json-compatibility">
+<a href="#name-json-compatibility" class="section-name selfRef">JSON Compatibility</a>
+            </h5>
+<p id="section-3.2.1.1-1">Note that JSON supports neither infinite numbers nor NaN.
+For protocols that are intended to work in both CBOR and JSON
+representations and need an out-of-band indicator comparable to NaN, a
+protocol developer might consider this (in CDDL, where <code>float</code> is not
+intended to be a NaN value):<a href="#section-3.2.1.1-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-3.2.1.1-2">
+<pre>
+float-with-null = float / null
+</pre><a href="#section-3.2.1.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.1.1-3">Additional choices can be added for the infinities (e.g., <code>false</code> and
+<code>true</code>, to stay within the CBOR simple values), if required.<a href="#section-3.2.1.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.1-4">Since <code>null</code>, <code>false</code> and <code>true</code> have single-byte representations, the
+replacement of NaN, -Infinity, and +Infinity by these values can save
+bytes even if JSON compatibility is not a consideration.<a href="#section-3.2.1.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.1-5">Applications that need to preserve the information in a NaN (sign bit,
+quiet bit, payload) may want to replace <code>null</code> with an
+application-oriented representation of that information, or simply
+with a (left-aligned, truncating trailing zero bytes) byte string
+representing those bits:<a href="#section-3.2.1.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.1-6">float-with-nan-replacement = float / bytes<a href="#section-3.2.1.1-6" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.1-7">For JSON, the byte string can be base16- or base64-encoded, or it can
+be represented by an integer, preserving its left-aligned nature.<a href="#section-3.2.1.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="implcons">
+<section id="section-3.2.2">
+          <h4 id="name-implementation-consideratio">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-implementation-consideratio" class="section-name selfRef">Implementation Considerations</a>
+          </h4>
+<p id="section-3.2.2-1">All floating-point numbers, including zeros and infinities, are signed.
+A NaN also carries a sign bit.
+Each of the three formats binary16, binary32, and binary64 define a
+fixed assignment of bits in the representation towards the sign bit,
+an exponent, and a "significand" (which represents the mantissa, with
+details sometimes depending on the specific exponent value).<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<span id="name-bit-allocation-in-floating-"></span><div id="tab-bits">
+<table class="center" id="table-1">
+            <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-bit-allocation-in-floating-" class="selfRef">Bit Allocation in Floating Point Formats</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Format</th>
+                <th class="text-left" rowspan="1" colspan="1">Sign bit</th>
+                <th class="text-left" rowspan="1" colspan="1">Exponent</th>
+                <th class="text-left" rowspan="1" colspan="1">Significand</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">binary16</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">10</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">binary32</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">8</td>
+                <td class="text-left" rowspan="1" colspan="1">23</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">binary64</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">11</td>
+                <td class="text-left" rowspan="1" colspan="1">52</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-3.2.2-3">Infinite numbers are represented in each format choice with a sign
+bit, the highest available exponent value (all ones) and all-zero
+significand.
+NaN values are represented with a sign bit, the highest available
+exponent value (all ones) and a non-zero significand, which carries a
+leading quiet bit with the rest of the bits allocated to the NaN payload.<a href="#section-3.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-4">To qualify as a generic encoder or decoder, a CBOR library needs to
+implement as much of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> support as reasonably possible on the
+platform it addresses.
+What is reasonably possible depends on:<a href="#section-3.2.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.2-5.1">
+              <p id="section-3.2.2-5.1.1">platform support for <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> numbers.  If there is no such
+support, the generic decoder may need to resort to offering the
+interchanged value to the application, suitably tagged.<a href="#section-3.2.2-5.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.2-5.2">
+              <p id="section-3.2.2-5.2.1">If there is partial support, it may be harder to find a good
+solution.  This is specifically a problem for platform support that
+works well in most cases, but exhibits some dark corners.
+E.g., the implementation may support a single NaN value
+consistently, but not preserving NaN information present in the NaN
+values.<a href="#section-3.2.2-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.2-6">Where an implementation needs to convert between different floating
+point formats, e.g., because not all formats are fully supported by
+the platform, or to implement Preferred Serialization (including for
+Common Deterministic Encoding) in an encoder, conversion of NaNs in
+these formats is best done by operating on the bit patterns of the
+<span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> number in the following way:<a href="#section-3.2.2-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.2-7.1">
+              <p id="section-3.2.2-7.1.1">Expansion (towards a larger size format):<a href="#section-3.2.2-7.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.2-7.1.2.1">
+                  <p id="section-3.2.2-7.1.2.1.1">preserve the sign bit<a href="#section-3.2.2-7.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-3.2.2-7.1.2.2">
+                  <p id="section-3.2.2-7.1.2.2.1">expand the (all-ones) exponent to the larger (all-ones) exponent<a href="#section-3.2.2-7.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-3.2.2-7.1.2.3">
+                  <p id="section-3.2.2-7.1.2.3.1">fill up the significand with zero bits on the right<a href="#section-3.2.2-7.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+</li>
+            <li class="normal" id="section-3.2.2-7.2">
+              <p id="section-3.2.2-7.2.1">Contraction (towards a smaller size format):<a href="#section-3.2.2-7.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.2-7.2.2.1">
+                  <p id="section-3.2.2-7.2.2.1.1">preserve the sign bit<a href="#section-3.2.2-7.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-3.2.2-7.2.2.2">
+                  <p id="section-3.2.2-7.2.2.2.1">truncate the (all-ones) exponent to the smaller (all-ones) exponent<a href="#section-3.2.2-7.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-3.2.2-7.2.2.3">
+                  <p id="section-3.2.2-7.2.2.3.1">truncate the significand from the right; check if the removed
+bits were all zero.<a href="#section-3.2.2-7.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+</li>
+          </ul>
+<p id="section-3.2.2-8">If the contraction is optional, e.g., for Preferred Serialization, do
+not perform the contraction if the removed bits in the significand
+truncation aren't all zero.
+If the contraction is required to fit into limited platform types
+(e.g., binary32 only), a failed truncation check should be signaled to
+the application.
+We say a contraction "preserves the NaN information" if subsequent
+expansion to the original size format recreates the same NaN value.<a href="#section-3.2.2-8" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-9"><a href="#app-nan" class="auto internal xref">Appendix A.1</a> gives additional detailed considerations for implementations
+that aspire to provide full support for NaNs, preserving NaN information.<a href="#section-3.2.2-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-float">
+<section id="section-4">
+      <h2 id="name-other-floating-point-number">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-other-floating-point-number" class="section-name selfRef">Other Floating Point Numbers</a>
+      </h2>
+<p id="section-4-1">RFC 8949 <span>[<a href="#STD94" class="cite xref">STD94</a>]</span> also defines tags 4 and 5 for a representation of
+decimal and binary floating point numbers that is not constrained by
+the types provided by IEEE 754.
+These tags are very flexible, but this flexibility comes with a choice
+of ways they could be integrated into a generic encoder.
+Because of this flexibility, tags 4 and 5 do not define a Preferred
+Serialization or a deterministic encoding.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12#section-3.2" class="relref">Section 3.2</a> of [<a href="#I-D.ietf-cbor-time-tag" class="cite xref">I-D.ietf-cbor-time-tag</a>]</span> uses representations derived
+from the tags 4 and 5 to represent timestamps.
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12#section-6.1" class="relref">Section 6.1</a> of [<a href="#I-D.ietf-cbor-time-tag" class="cite xref">I-D.ietf-cbor-time-tag</a>]</span> lists various other tags that
+can be used for representing numbers for advanced arithmetic,
+including rational numbers in fraction form (tag 30).<a href="#section-4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-array">
+<section id="section-5">
+      <h2 id="name-tagged-arrays-of-numbers">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-tagged-arrays-of-numbers" class="section-name selfRef">Tagged Arrays of Numbers</a>
+      </h2>
+<p id="section-5-1"><span>[<a href="#RFC8746" class="cite xref">RFC8746</a>]</span> defines tags for typed arrays, i.e., arrays of numbers that
+all are represented in the same way.
+The choices defined in the <span>[<a href="#RFC8746" class="cite xref">RFC8746</a>]</span> are all based on traditional
+platform number representations (unsigned integers, signed integers,
+IEEE 754 floating point values) and even come in little-endian and
+big-endian variants, often removing the need to convert the numbers
+from an internal to an interchange form.
+As conversion for interchange is not envisioned,
+considerations for a preferred serialization are not applicable.
+As the recipient may need a conversion for ingestion of the arrays,
+some considerations from <a href="#sec-ieee" class="auto internal xref">Section 3</a> may apply.<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-6">
+      <h2 id="name-security-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-6-1">The general security considerations for representing data in common
+data representation formats apply, e.g., those in Section <a href="https://rfc-editor.org/rfc/rfc8949#section-10" class="relref">10</a> of RFC 8949 <span>[<a href="#STD94" class="cite xref">STD94</a>]</span>.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">(TODO)<a href="#section-6-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">(TODO:<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">Add nan'' registration when that is ready)<a href="#section-7-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-8">
+      <h2 id="name-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-8.1">
+        <h3 id="name-normative-references">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="BCP14">[BCP14]</dt>
+        <dd>
+<div class="refInstance">Best Current Practice 14, <span>&lt;<a href="https://www.rfc-editor.org/info/bcp14">https://www.rfc-editor.org/info/bcp14</a>&gt;</span>.<br><span>At the time of writing, this BCP comprises the following:</span>
+</div>
+<div class="refInstance" id="RFC2119">
+            <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </div>
+<div class="refInstance" id="RFC8174">
+            <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </div>
+</dd>
+<dd class="break"></dd>
+<dt id="IEEE754">[IEEE754]</dt>
+        <dd>
+<span class="refAuthor">IEEE</span>, <span class="refTitle">"IEEE Standard for Floating-Point Arithmetic"</span>, <span class="seriesInfo">IEEE Std 754-2019</span>, <span class="seriesInfo">DOI 10.1109/IEEESTD.2019.8766229</span>, <span>&lt;<a href="https://ieeexplore.ieee.org/document/8766229">https://ieeexplore.ieee.org/document/8766229</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8610">[RFC8610]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Vigano, C.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"Concise Data Definition Language (CDDL): A Notational Convention to Express Concise Binary Object Representation (CBOR) and JSON Data Structures"</span>, <span class="seriesInfo">RFC 8610</span>, <span class="seriesInfo">DOI 10.17487/RFC8610</span>, <time datetime="2019-06" class="refDate">June 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8610">https://www.rfc-editor.org/rfc/rfc8610</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8746">[RFC8746]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C., Ed.</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Tags for Typed Arrays"</span>, <span class="seriesInfo">RFC 8746</span>, <span class="seriesInfo">DOI 10.17487/RFC8746</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8746">https://www.rfc-editor.org/rfc/rfc8746</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="STD94">[STD94]</dt>
+      <dd>
+<div class="refInstance">Internet Standard 94, <span>&lt;<a href="https://www.rfc-editor.org/info/std94">https://www.rfc-editor.org/info/std94</a>&gt;</span>.<br><span>At the time of writing, this STD comprises the following:</span>
+</div>
+<div class="refInstance" id="RFC8949">
+            <span class="refAuthor">Bormann, C.</span> and <span class="refAuthor">P. Hoffman</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR)"</span>, <span class="seriesInfo">STD 94</span>, <span class="seriesInfo">RFC 8949</span>, <span class="seriesInfo">DOI 10.17487/RFC8949</span>, <time datetime="2020-12" class="refDate">December 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8949">https://www.rfc-editor.org/info/rfc8949</a>&gt;</span>. </div>
+</dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-8.2">
+        <h3 id="name-informative-references">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.bormann-cbor-det">[I-D.bormann-cbor-det]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR: On Deterministic Encoding"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-bormann-cbor-det-02</span>, <time datetime="2024-03-03" class="refDate">3 March 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-bormann-cbor-det-02">https://datatracker.ietf.org/doc/html/draft-bormann-cbor-det-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-cbor-cde">[I-D.ietf-cbor-cde]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Common Deterministic Encoding (CDE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-cde-02</span>, <time datetime="2024-03-03" class="refDate">3 March 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-02">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-cbor-time-tag">[I-D.ietf-cbor-time-tag]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refAuthor">Gamari, B.</span>, and <span class="refAuthor">H. Birkholz</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Tags for Time, Duration, and Period"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-time-tag-12</span>, <time datetime="2023-10-30" class="refDate">30 October 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.mcnally-deterministic-cbor">[I-D.mcnally-deterministic-cbor]</dt>
+      <dd>
+<span class="refAuthor">McNally, W.</span>, <span class="refAuthor">Allen, C.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"dCBOR: A Deterministic CBOR Application Profile"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mcnally-deterministic-cbor-10</span>, <time datetime="2024-06-10" class="refDate">10 June 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-10">https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-10</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+<div id="impcheck">
+<section id="appendix-A">
+      <h2 id="name-implementers-checklists-for">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-implementers-checklists-for" class="section-name selfRef">Implementers' Checklists for Floating Point Values</a>
+      </h2>
+<p id="appendix-A-1">This check list employs <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> keywords to indicate interoperability
+requirements on implementations.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The following considerations apply to encoding (emitting) floating
+point values in a generic encoder:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-3.1">
+          <p id="appendix-A-3.1.1">The length of the argument is encoded in the lower 5 bits of the
+first byte ("ai"), which indicates half precision (binary16, ai = 0x19),
+single precision (binary32, ai = 0x1a) and double precision
+(binary64, ai = 0x1b).<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
+<p id="appendix-A-3.1.2">
+For preferred serialization: if multiple of these encodings
+preserve the precision of the value to be encoded, only the
+shortest form of these <span class="bcp14">MUST</span> be emitted.
+That implies that encoders <span class="bcp14">MUST</span> support half-precision and (if
+there is support for more than half precision on the platform)
+single-precision floating point.
+Positive and negative infinity and zero <span class="bcp14">MUST</span> be represented in
+half-precision floating point.<a href="#appendix-A-3.1.2" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.2">
+          <p id="appendix-A-3.2.1">NaNs <span class="bcp14">MUST</span> be supported, for all values of NaN information allowed
+in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-A-3.2.2">
+As with all floating point numbers, NaNs with payloads <span class="bcp14">MUST</span> be
+contracted to the shortest of double, single or half precision that
+preserves the NaN information.<a href="#appendix-A-3.2.2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3.2.3">
+The reduction is performed by removing the rightmost N bits of the
+payload, where N is the difference in the number of bits in the
+significand (mantissa) between the original format and the
+reduced format.
+The reduction is performed only (preserves the value only) if all the
+rightmost bits removed are zero.
+(This will always reduce a double or single quiet NaN with an
+otherwise zero NaN payload, which is typically what is returned
+from an operation such as 0.0/0.0, to a half-precision quiet NaN
+encoded as 0xf9 7e00.)<a href="#appendix-A-3.2.3" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-4">The following considerations apply to decoding (ingesting) floating
+point values in a generic decoder that supports IEEE 754 floating-point numbers:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-5.1">
+          <p id="appendix-A-5.1.1">Half-precision values <span class="bcp14">MUST</span> be accepted.<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.2">
+          <p id="appendix-A-5.2.1">Double- and single-precision values <span class="bcp14">SHOULD</span> be accepted; leaving these out
+is only foreseen for decoders that need to work in exceptionally
+constrained environments.<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.3">
+          <p id="appendix-A-5.3.1">If double-precision values are accepted, single-precision values
+<span class="bcp14">MUST</span> be accepted.<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.4">
+          <p id="appendix-A-5.4.1">NaNs, <span class="bcp14">MUST</span> be accepted, preserving the NaN information for use of
+the application.<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<div id="app-nan">
+<section id="appendix-A.1">
+        <h3 id="name-nan-payloads">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-nan-payloads" class="section-name selfRef">NaN Payloads</a>
+        </h3>
+<p id="appendix-A.1-1">An IEEE-754 data item has up to 52 bits in the significand.
+For a NaN, the first of these bits is used to indicate whether the NaN
+is signalling (0) or quiet (1).
+The up to 51 bits in the rest of the significand are called the "NAN
+payload".<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">The payload’s original purpose is diagnostic information to explain
+why a NaN was generated by a local computation.
+There is no standard for the contents of a NaN payload.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-3">CBOR allows NaNs with non-zero payloads to be encoded.
+(Due to the way infinite numbers are encoded in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>,
+zero-payload NaN always must be quiet NaNs.)<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-4">As a result, if a protocol design does not use NaNs with non-zero
+payloads and is using preferred serialization then NaN must be encoded
+as a half-precision with the quiet bit set and the payload set as 0,
+specifically 0xF97E00.
+If a design does not use NaNs with non-zero payloads and preferred
+serialization is not used, then the single and double precision quiet
+NaNs, 0xFA7FC00000 and 0xFB7FF0000000000000, may also be used.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-5">NaN payloads have been in the IEEE-754 standard since 2008, but
+programming environments often still do not provide facilities (e.g.,
+APIs) to make use of them.
+For example, in C there is the isnan() API to check if a value is a
+NaN, but there are no APIs to construct or access the NaN payload.
+The typical way to work with a NaN payload is to reinterpret the
+floating-point value as an unsigned integer and then use shifts and
+masks to unpack the IEEE-754 representation.<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
+<div id="nan-implementation-details">
+<section id="appendix-A.1.1">
+          <h4 id="name-nan-implementation-details">
+<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-nan-implementation-details" class="section-name selfRef">NaN Implementation Details</a>
+          </h4>
+<p id="appendix-A.1.1-1">This section is primarily for CBOR library implementors.<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-2">CBOR attempts to limit the MUSTs about CBOR implementations in order
+to allow its use in a large variety of constrained use cases.
+For example, support for integers is not required because a protocol
+might need only strings.
+Similarly, there is no <span class="bcp14">MUST</span> that requires support of NaN and NaNs with
+non-zero payloads, but the recommendation here is that any generic
+CBOR library that supports floating-point support NaNs, preferably
+also with non-zero NaN payloads.<a href="#appendix-A.1.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-3">In most environments, there is little extra work to do to support NaN
+without payloads if floating-point is supported.
+NaNs will usually flow through as any other floating-point value.<a href="#appendix-A.1.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-4">Generic CBOR libraries are expected to support preferred serialization
+of floating-point including NaNs.
+For NaNs with zero payloads, this requires reducing to a half-precision
+NaN without a payload.
+This requires a few explicit extra lines of code.
+See the sample half-precision implementation in Appendix D of RFC 8949.<a href="#appendix-A.1.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-5">The implementation of preferred serialization of NaN payloads needs a
+few more additional lines.
+As with preferred serialization, NaN payloads must be reduced but only
+if they can be reduced without the loss of any non-zero payload bits.
+Programming platform provided floating-point hardware and software may
+or may not do this correctly for double to single conversion.
+The sample half-precision implementation in Appendix D of RFC 8949
+only supports NaNs without payloads.<a href="#appendix-A.1.1-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-6">A double precision NaN payload contains 51 bits, a single 22 bits and
+a half 9 bits, in each case all but the first bit of the significand.
+A double precision NaN can be reduced to a single precision NaN only if the right-most 29 payload bits are zero.
+A single precision NaN can be reduced to a half precision NaN only if the right-most 13 payload bits are zero.
+A double NaN can be reduced to a half precision NaN only if the right-most 42 payload bits are zero.
+Note that the exponent is always all-ones for NaN, so this is simpler
+than the equivalent contraction of regular, non-NAN, floating-point values.<a href="#appendix-A.1.1-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-7">To implement the above, most CBOR libraries will have to reinterpret
+the floating point value as an unsigned integer and use shifts and
+masks, based in the internal representation defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A.1.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-8">Testing on some CPUs has shown them to do this correctly for conversion between single and double.
+However, it may not be very useful to rely on platform libraries for the following reasons.
+First, they may provide no support at all for half-precision and half-precision is required for preferred serialization.
+Second, NaN payloads are a relatively recent and very specialist
+feature that is not usually used in interchange.<a href="#appendix-A.1.1-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-9">If platform implementation is relied upon, NaN payload reduction should be tested on each platform.
+Open source libraries intended to run on multiple platforms may be
+better off not relying on the platform.<a href="#appendix-A.1.1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="nan-tests-examples">
+<section id="appendix-A.1.2">
+          <h4 id="name-nan-tests-examples">
+<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-nan-tests-examples" class="section-name selfRef">NaN Tests Examples</a>
+          </h4>
+<p id="appendix-A.1.2-1">The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
+(binary32) unsigned integer in hex to show the bits that make up the
+floating-point value.
+All of the following are NaNs.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
+<span id="name-examples-for-preferred-seri"></span><div id="nan-examples">
+<table class="center" id="table-2">
+            <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-examples-for-preferred-seri" class="selfRef">Examples for Preferred Serialization of NaN values</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">IEEE-754 Number</th>
+                <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
+                <th class="text-left" rowspan="1" colspan="1">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7ff8000000000000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xf97e00</td>
+                <td class="text-left" rowspan="1" colspan="1">qNaN reduced from double to half</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7ff8000000000001</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfb7ff8000000000001</td>
+                <td class="text-left" rowspan="1" colspan="1">Can't be reduced because of bit set in payload</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7ffffc0000000000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xf97fff</td>
+                <td class="text-left" rowspan="1" colspan="1">10-bit payload that can be reduced to half</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7ff80000000003ff</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfb7ff80000000003ff</td>
+                <td class="text-left" rowspan="1" colspan="1">right-justified payload can't be reduced</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7fffffffe0000000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfa7fffffff</td>
+                <td class="text-left" rowspan="1" colspan="1">23-bit payload that reduces to single</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7ffffffff0000000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfb7ffffffff0000000</td>
+                <td class="text-left" rowspan="1" colspan="1">24-bit payload that can't be reduced</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7fffffffffffffff</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfb7fffffffffffffff</td>
+                <td class="text-left" rowspan="1" colspan="1">All payload bits set</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7fc00000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xf97e00</td>
+                <td class="text-left" rowspan="1" colspan="1">qNaN reduced from single to half</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7fffe000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xf97fff</td>
+                <td class="text-left" rowspan="1" colspan="1">single 10-bit payload that can be reduced</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x7fbff000</td>
+                <td class="text-left" rowspan="1" colspan="1">0xfa7fbff000</td>
+                <td class="text-left" rowspan="1" colspan="1">single payload that can't be reduced to 10 bits</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+    </h2>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Carsten Bormann</span></div>
+<div dir="auto" class="left"><span class="org">Universität Bremen TZI</span></div>
+<div dir="auto" class="left"><span class="street-address">Postfach 330440</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">D-28359</span> <span class="locality">Bremen</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+49-421-218-63921" class="tel">+49-421-218-63921</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:cabo@tzi.org" class="email">cabo@tzi.org</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Laurence Lundblade</span></div>
+<div dir="auto" class="left"><span class="org">Security Theory LLC</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:lgl@securitytheory.com" class="email">lgl@securitytheory.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
