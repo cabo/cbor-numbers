@@ -10,7 +10,7 @@ stream: IETF
 date:
 consensus: true
 area: "Applications and Real-Time"
-workgroup: "Concise Binary Object Representation Maintenance and Extensions"
+workgroup: "Concise Binary Object Representation Maint&Ext"
 keyword:
 
 venue:
@@ -52,6 +52,21 @@ informative:
   I-D.ietf-cbor-cde: cde
   I-D.bormann-cbor-det: det
   I-D.mcnally-deterministic-cbor: dcbor-orig
+#  Cplusplus:
+#    target: https://www.iso.org/standard/83626.html
+#    title: Programming languages — C++
+#    author:
+#    - org: International Organization for Standardization
+#    date: 2024-10
+#    seriesinfo:
+#      ISO/IEC: 14882:2024
+#    refcontent:
+#    - Edition 7
+#    annotation: >
+#       
+#      The standard is widely known as C++23.
+#      Its technical content is also available via
+#      <https://open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf>.
   Cplusplus20:
     target: https://isocpp.org/files/papers/N4860.pdf
     title: Programming languages - C++
