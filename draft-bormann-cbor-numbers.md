@@ -605,5 +605,7 @@ All of the following are NaNs.
 |         0x7fbff000 |         0xfa7fbff000 | single payload that can't be contracted to 10 bits                   |
 {: #nan-examples title="Examples for Preferred Serialization of NaN values"}
 
+{::include-all lists.md}
+
 # Acknowledgments
 {:unnumbered}
