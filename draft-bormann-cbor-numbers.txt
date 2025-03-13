@@ -4,8 +4,8 @@
 
 Concise Binary Object Representation Maint&Ext                C. Bormann
 Internet-Draft                                    Universität Bremen TZI
-Intended status: Informational                            9 January 2025
-Expires: 13 July 2025
+Intended status: Informational                             13 March 2025
+Expires: 14 September 2025
 
 
                            On Numbers in CBOR
@@ -53,9 +53,9 @@ About This Document
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 1]
+Bormann                 Expires 14 September 2025               [Page 1]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
 Status of This Memo
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 July 2025.
+   This Internet-Draft will expire on 14 September 2025.
 
 Copyright Notice
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 2]
+Bormann                 Expires 14 September 2025               [Page 2]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    Appendix A.  Implementers' Checklists for Floating Point
@@ -119,8 +119,9 @@ Internet-Draft                CBOR Numbers                  January 2025
      A.1.  NaN Payloads  . . . . . . . . . . . . . . . . . . . . . .  13
        A.1.1.  NaN Implementation Details  . . . . . . . . . . . . .  14
        A.1.2.  NaN Tests Examples  . . . . . . . . . . . . . . . . .  15
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  16
-   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .  16
+   List of Tables  . . . . . . . . . . . . . . . . . . . . . . . . .  16
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  17
+   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .  17
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
 
 1.  Introduction
@@ -164,10 +165,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-
-Bormann                   Expires 13 July 2025                  [Page 3]
+Bormann                 Expires 14 September 2025               [Page 3]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    *  Interoperability considerations, potential "dark corners"
@@ -221,9 +221,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 4]
+Bormann                 Expires 14 September 2025               [Page 4]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    Note that there is no "signed type" in CBOR: as any specific number
@@ -277,9 +277,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 5]
+Bormann                 Expires 14 September 2025               [Page 5]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
 3.1.  Integer vs. Floating Point
@@ -333,9 +333,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 6]
+Bormann                 Expires 14 September 2025               [Page 6]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
       It can be surprising that according to [IEEE754], NaN values
@@ -389,9 +389,9 @@ JSON Compatibility
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 7]
+Bormann                 Expires 14 September 2025               [Page 7]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    Since null, false and true have single-byte representations, the
@@ -445,9 +445,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 8]
+Bormann                 Expires 14 September 2025               [Page 8]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    To qualify as a generic encoder or decoder, a CBOR library needs to
@@ -501,9 +501,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                  [Page 9]
+Bormann                 Expires 14 September 2025               [Page 9]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    If the contraction is optional, e.g., for Preferred Serialization, do
@@ -557,9 +557,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                 [Page 10]
+Bormann                 Expires 14 September 2025              [Page 10]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
 7.  IANA Considerations
@@ -613,9 +613,9 @@ Internet-Draft                CBOR Numbers                  January 2025
 
 
 
-Bormann                   Expires 13 July 2025                 [Page 11]
+Bormann                 Expires 14 September 2025              [Page 11]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    [Cplusplus20]
@@ -625,16 +625,17 @@ Internet-Draft                CBOR Numbers                  January 2025
               <https://isocpp.org/files/papers/N4860.pdf>.
 
    [I-D.bormann-cbor-det]
-              Bormann, C., "CBOR: On Deterministic Encoding", Work in
-              Progress, Internet-Draft, draft-bormann-cbor-det-03, 21
-              July 2024, <https://datatracker.ietf.org/doc/html/draft-
-              bormann-cbor-det-03>.
+              Bormann, C., "CBOR: On Deterministic Encoding and
+              Representation", Work in Progress, Internet-Draft, draft-
+              bormann-cbor-det-04, 21 January 2025,
+              <https://datatracker.ietf.org/doc/html/draft-bormann-cbor-
+              det-04>.
 
    [I-D.ietf-cbor-cde]
               Bormann, C., "CBOR Common Deterministic Encoding (CDE)",
-              Work in Progress, Internet-Draft, draft-ietf-cbor-cde-06,
-              16 October 2024, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-cbor-cde-06>.
+              Work in Progress, Internet-Draft, draft-ietf-cbor-cde-08,
+              10 February 2025, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-cbor-cde-08>.
 
    [I-D.ietf-cbor-time-tag]
               Bormann, C., Gamari, B., and H. Birkholz, "Concise Binary
@@ -648,9 +649,9 @@ Internet-Draft                CBOR Numbers                  January 2025
               McNally, W., Allen, C., Bormann, C., and L. Lundblade,
               "dCBOR: A Deterministic CBOR Application Profile", Work in
               Progress, Internet-Draft, draft-mcnally-deterministic-
-              cbor-11, 8 August 2024,
+              cbor-12, 7 February 2025,
               <https://datatracker.ietf.org/doc/html/draft-mcnally-
-              deterministic-cbor-11>.
+              deterministic-cbor-12>.
 
 Appendix A.  Implementers' Checklists for Floating Point Values
 
@@ -668,10 +669,9 @@ Appendix A.  Implementers' Checklists for Floating Point Values
 
 
 
-
-Bormann                   Expires 13 July 2025                 [Page 12]
+Bormann                 Expires 14 September 2025              [Page 12]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
       For preferred serialization: if multiple of these encodings
@@ -725,9 +725,9 @@ A.1.  NaN Payloads
 
 
 
-Bormann                   Expires 13 July 2025                 [Page 13]
+Bormann                 Expires 14 September 2025              [Page 13]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    The payload’s original purpose is diagnostic information to explain
@@ -781,9 +781,9 @@ A.1.1.  NaN Implementation Details
 
 
 
-Bormann                   Expires 13 July 2025                 [Page 14]
+Bormann                 Expires 14 September 2025              [Page 14]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
    The implementation of preferred serialization of NaN payloads needs a
@@ -837,9 +837,9 @@ A.1.2.  NaN Tests Examples
 
 
 
-Bormann                   Expires 13 July 2025                 [Page 15]
+Bormann                 Expires 14 September 2025              [Page 15]
 
-Internet-Draft                CBOR Numbers                  January 2025
+Internet-Draft                CBOR Numbers                    March 2025
 
 
     +====================+======================+=====================+
@@ -886,17 +886,21 @@ Internet-Draft                CBOR Numbers                  January 2025
 
         Table 2: Examples for Preferred Serialization of NaN values
 
+List of Tables
+
+   1.  Bit Allocation in Floating Point Formats (Table 1)
+   2.  Examples for Preferred Serialization of NaN values (Table 2)
+
+
+
+Bormann                 Expires 14 September 2025              [Page 16]
+
+Internet-Draft                CBOR Numbers                    March 2025
+
+
 Acknowledgments
 
 Contributors
-
-
-
-
-Bormann                   Expires 13 July 2025                 [Page 16]
-
-Internet-Draft                CBOR Numbers                  January 2025
-
 
    Laurence Lundblade
    Security Theory LLC
@@ -945,8 +949,4 @@ Author's Address
 
 
 
-
-
-
-
-Bormann                   Expires 13 July 2025                 [Page 17]
+Bormann                 Expires 14 September 2025              [Page 17]
