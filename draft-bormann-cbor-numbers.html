@@ -23,21 +23,21 @@ number formats.
 together from various components, so it has a higher level of
 redundancy than ultimately desired. 
     " name="description">
-<meta content="xml2rfc 3.28.0" name="generator">
+<meta content="xml2rfc 3.29.0" name="generator">
 <meta content="draft-bormann-cbor-numbers-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.0
-    Python 3.12.9
+  xml2rfc 3.29.0
+    Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
-    Jinja2 3.1.5
-    lxml 5.3.0
-    platformdirs 4.3.6
+    Jinja2 3.1.6
+    lxml 5.3.1
+    platformdirs 4.3.8
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.3
-    setuptools 70.3.0
+    requests 2.32.4
+    setuptools 80.9.0
     wcwidth 0.2.13
 -->
 <link href="draft-bormann-cbor-numbers.xml" rel="alternate" type="application/rfc+xml">
@@ -1057,11 +1057,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">CBOR Numbers</td>
-<td class="right">March 2025</td>
+<td class="right">July 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Bormann</td>
-<td class="center">Expires 14 September 2025</td>
+<td class="center">Expires 8 January 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1074,12 +1074,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-bormann-cbor-numbers-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-03-13" class="published">13 March 2025</time>
+<time datetime="2025-07-07" class="published">7 July 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-09-14">14 September 2025</time></dd>
+<dd class="expires"><time datetime="2026-01-08">8 January 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1142,7 +1142,7 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1231,10 +1231,13 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
                 <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-nan-payloads" class="internal xref">NaN Payloads</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.1">
-                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-nan-implementation-details" class="internal xref">NaN Implementation Details</a></p>
+                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-working-with-nans" class="internal xref">Working with NaNs</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.2">
-                    <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-nan-tests-examples" class="internal xref">NaN Tests Examples</a></p>
+                    <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-nan-implementation-details" class="internal xref">NaN Implementation Details</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.3">
+                    <p id="section-toc.1-1.9.2.1.2.3.1"><a href="#appendix-A.1.3" class="auto internal xref">A.1.3</a>.  <a href="#name-nan-tests-examples" class="internal xref">NaN Tests Examples</a></p>
 </li>
                 </ul>
 </li>
@@ -1295,7 +1298,7 @@ number formats.<a href="#section-1-3" class="pilcrow">¶</a></p>
 efficiency (CPU used in processing)<a href="#section-1-7.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-7.2">
-          <p id="section-1-7.2.1">Preferred Serialization, Common Deterministic Encoding Profile (CDE,
+          <p id="section-1-7.2.1">Preferred Serialization, Common Deterministic Encoding (CDE,
 <span>[<a href="#I-D.ietf-cbor-cde" class="cite xref">I-D.ietf-cbor-cde</a>]</span>, see also <span>[<a href="#I-D.bormann-cbor-det" class="cite xref">I-D.bormann-cbor-det</a>]</span> for more background discussion)<a href="#section-1-7.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-7.3">
@@ -1422,7 +1425,8 @@ being the original JavaScript language, which only had one number type).<a href=
 <p id="section-3.1-2">For specific applications, it may be desirable to represent all
 numbers that can be represented as integers as such, even if they are
 used where floating point numbers are used for non-integers.
-<span>[<a href="#I-D.mcnally-deterministic-cbor" class="cite xref">I-D.mcnally-deterministic-cbor</a>]</span> defines a CDE application profile that enforces this for
+<span>[<a href="#I-D.mcnally-deterministic-cbor" class="cite xref">I-D.mcnally-deterministic-cbor</a>]</span> defines application-level deterministic representation
+rules that can be used with CDE to enforce this for
 a certain subset of the integers.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">Most CBOR applications so far have tended to get by with the kind of
 strong separation between the integer and floating point worlds that
@@ -1501,35 +1505,59 @@ Protocol designs aiming for the widest possible platform support may
 want to implement replacements for infinite numbers and NaNs, or at
 least not rely on NaN information being successfully preserved during
 interchange.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
-<div id="json-compatibility">
+<div id="use-cases-for-full-support-of-nan-values">
 <section id="section-3.2.1.1">
-            <h5 id="name-json-compatibility">
-<a href="#name-json-compatibility" class="section-name selfRef">JSON Compatibility</a>
+            <h5 id="name-use-cases-for-full-support-">
+<a href="#section-3.2.1.1" class="section-number selfRef">3.2.1.1. </a><a href="#name-use-cases-for-full-support-" class="section-name selfRef">Use Cases for Full Support of NaN Values</a>
             </h5>
-<p id="section-3.2.1.1-1">Note that JSON supports neither infinite numbers nor NaN.
+<p id="section-3.2.1.1-1">Given the dark corners mentioned, a CBOR implementer might question
+whether there even are good use cases for full NaN support.
+The author conjectures that the main use case will be moving existing
+complex algorithms from a monolithic implementation to a distributed one.
+A data representation format is generally needed for this, and CBOR
+may be a good choice if the target environment is not entirely
+homogeneous.
+Since existing algorithms may make use of IEEE 754 including its NaN
+values, full support for inserting CBOR intermediate representation
+into an algorithm implies full support for NaNs.
+(This also means that the main objective for such implementations is
+full data transparency, not necessary great internal APIs for dealing
+with the data — IEEE 754 is that API!)<a href="#section-3.2.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="json-compatibility">
+<section id="section-3.2.1.2">
+            <h5 id="name-json-compatibility">
+<a href="#section-3.2.1.2" class="section-number selfRef">3.2.1.2. </a><a href="#name-json-compatibility" class="section-name selfRef">JSON Compatibility</a>
+            </h5>
+<p id="section-3.2.1.2-1">Note that JSON supports neither infinite numbers nor NaN.
 For protocols that are intended to work in both CBOR and JSON
 representations and need an out-of-band indicator comparable to NaN, a
 protocol developer might consider this (in CDDL, where <code>float</code> is not
-intended to be a NaN value):<a href="#section-3.2.1.1-1" class="pilcrow">¶</a></p>
-<div class="lang-cddl sourcecode" id="section-3.2.1.1-2">
+intended to be a NaN value):<a href="#section-3.2.1.2-1" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-3.2.1.2-2">
 <pre>
 float-with-null = float / null
-</pre><a href="#section-3.2.1.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-3.2.1.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-3.2.1.1-3">Additional choices can be added for the infinities (e.g., <code>false</code> and
-<code>true</code>, to stay within the CBOR simple values), if required.<a href="#section-3.2.1.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.1-4">Since <code>null</code>, <code>false</code> and <code>true</code> have single-byte representations, the
+<p id="section-3.2.1.2-3">Additional choices can be added for the infinities (e.g., <code>false</code> and
+<code>true</code>, to stay within the CBOR simple values), if required.<a href="#section-3.2.1.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.2-4">Since <code>null</code>, <code>false</code> and <code>true</code> have single-byte representations, the
 replacement of NaN, −Infinity, and (positive) Infinity by these values can save
-bytes even if JSON compatibility is not a consideration.<a href="#section-3.2.1.1-4" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.1-5">Applications that need to preserve the information in a NaN (sign bit,
+bytes even if JSON compatibility is not a consideration.<a href="#section-3.2.1.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.1.2-5">Applications that need to preserve the information in a NaN (sign bit,
 quiet bit, payload) may want to replace <code>null</code> with an
 application-oriented representation of that information, or simply
 with a (left-aligned, truncating trailing zero bytes) byte string
-representing those bits:<a href="#section-3.2.1.1-5" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.1-6">float-with-nan-replacement = float / bytes<a href="#section-3.2.1.1-6" class="pilcrow">¶</a></p>
-<p id="section-3.2.1.1-7">For JSON, the byte string can be base16- or base64-encoded, or it can
+representing those bits:<a href="#section-3.2.1.2-5" class="pilcrow">¶</a></p>
+<div class="lang-cddl sourcecode" id="section-3.2.1.2-6">
+<pre>
+float-with-nan-replacement = float / bytes
+</pre><a href="#section-3.2.1.2-6" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.1.2-7">For JSON, the byte string can be base16- or base64-encoded, or it can
 be represented by an integer, preserving its left-aligned nature, or
-even as a (tagged) floating point value with a different exponent.<a href="#section-3.2.1.1-7" class="pilcrow">¶</a></p>
+even as a (tagged) floating point value with a different exponent.<a href="#section-3.2.1.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1671,9 +1699,9 @@ These tags are very flexible, but this flexibility comes with a choice
 of ways they could be integrated into a generic encoder.
 Because of this flexibility, tags 4 and 5 do not define a Preferred
 Serialization or a deterministic encoding.<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12#section-3.2" class="relref">Section 3.2</a> of [<a href="#I-D.ietf-cbor-time-tag" class="cite xref">I-D.ietf-cbor-time-tag</a>]</span> uses representations derived
+<p id="section-4-2"><span><a href="https://rfc-editor.org/rfc/rfc9581#section-3.2" class="relref">Section 3.2</a> of [<a href="#RFC9581" class="cite xref">RFC9581</a>]</span> uses representations derived
 from the tags 4 and 5 to represent timestamps.
-<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12#section-6.1" class="relref">Section 6.1</a> of [<a href="#I-D.ietf-cbor-time-tag" class="cite xref">I-D.ietf-cbor-time-tag</a>]</span> lists various other tags that
+<span><a href="https://rfc-editor.org/rfc/rfc9581#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9581" class="cite xref">RFC9581</a>]</span> lists various other tags that
 can be used for representing numbers for advanced arithmetic,
 including rational numbers in fraction form (tag 30).<a href="#section-4-2" class="pilcrow">¶</a></p>
 </section>
@@ -1748,6 +1776,10 @@ data representation formats apply, e.g., those in Section <a href="https://rfc-e
         <dd>
 <span class="refAuthor">Bormann, C., Ed.</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Tags for Typed Arrays"</span>, <span class="seriesInfo">RFC 8746</span>, <span class="seriesInfo">DOI 10.17487/RFC8746</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8746">https://www.rfc-editor.org/rfc/rfc8746</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC9581">[RFC9581]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refAuthor">Gamari, B.</span>, and <span class="refAuthor">H. Birkholz</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Tags for Time, Duration, and Period"</span>, <span class="seriesInfo">RFC 9581</span>, <span class="seriesInfo">DOI 10.17487/RFC9581</span>, <time datetime="2024-08" class="refDate">August 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9581">https://www.rfc-editor.org/rfc/rfc9581</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="STD94">[STD94]</dt>
       <dd>
 <div class="refInstance">Internet Standard 94, <span>&lt;<a href="https://www.rfc-editor.org/info/std94">https://www.rfc-editor.org/info/std94</a>&gt;</span>.<br><span>At the time of writing, this STD comprises the following:</span>
@@ -1765,6 +1797,16 @@ data representation formats apply, e.g., those in Section <a href="https://rfc-e
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="ARM">[ARM]</dt>
+        <dd>
+<span class="refAuthor">Arm Limited</span>, <span class="refTitle">"Arm Architecture Reference Manual for A-profile architecture"</span>, <time datetime="2025-04" class="refDate">April 2025</time>, <span>&lt;<a href="https://developer.arm.com/documentation/ddi0487/latest/">https://developer.arm.com/documentation/ddi0487/latest/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="C23">[C23]</dt>
+        <dd>
+<span class="refAuthor">International Organization for Standardization</span>, <span class="refTitle">"Information technology — Programming languages — C"</span>, <span class="seriesInfo">ISO/IEC 9899:2024</span>, <time datetime="2024-10" class="refDate">October 2024</time>, <span>&lt;<a href="https://www.iso.org/standard/82075.html">https://www.iso.org/standard/82075.html</a>&gt;</span>. <span class="annotation"><br>
+This revision of the standard is widely known as C23. Technically equivalent specification text is available at <a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf">https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf</a>.</span>
+        </dd>
+<dd class="break"></dd>
 <dt id="Cplusplus20">[Cplusplus20]</dt>
         <dd>
 <span class="refAuthor">International Organization for Standardization</span>, <span class="refTitle">"Programming languages - C++"</span>, <span class="refContent">Sixth Edition</span>, <span class="seriesInfo">ISO/IEC ISO/IEC JTC1 SC22 WG21 N 4860</span>, <time datetime="2020-03" class="refDate">March 2020</time>, <span>&lt;<a href="https://isocpp.org/files/papers/N4860.pdf">https://isocpp.org/files/papers/N4860.pdf</a>&gt;</span>. </dd>
@@ -1775,11 +1817,7 @@ data representation formats apply, e.g., those in Section <a href="https://rfc-e
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-cde">[I-D.ietf-cbor-cde]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Common Deterministic Encoding (CDE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-cde-08</span>, <time datetime="2025-02-10" class="refDate">10 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-08">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-08</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.ietf-cbor-time-tag">[I-D.ietf-cbor-time-tag]</dt>
-        <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refAuthor">Gamari, B.</span>, and <span class="refAuthor">H. Birkholz</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Tags for Time, Duration, and Period"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-time-tag-12</span>, <time datetime="2023-10-30" class="refDate">30 October 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-time-tag-12</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Common Deterministic Encoding (CDE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-cde-11</span>, <time datetime="2025-05-12" class="refDate">12 May 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-11">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-11</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.mcnally-deterministic-cbor">[I-D.mcnally-deterministic-cbor]</dt>
       <dd>
@@ -1860,7 +1898,10 @@ the application.<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
         <h3 id="name-nan-payloads">
 <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-nan-payloads" class="section-name selfRef">NaN Payloads</a>
         </h3>
-<p id="appendix-A.1-1">An IEEE-754 data item has up to 52 bits in the significand.
+<p id="appendix-A.1-1">The basic data model of CBOR directly supports IEEE-754 data item of
+the forms binary16, binary32, and binary64.
+These have 10, 23, and 52 bits in the space provided for encoding the
+significand (see <a href="#tab-bits" class="auto internal xref">Table 1</a>).
 For a NaN, the first of these bits is used to indicate whether the NaN
 is signalling (0) or quiet (1).
 The up to 51 bits in the rest of the significand are called the "NAN
@@ -1878,74 +1919,104 @@ specifically 0xF97E00.
 If a design does not use NaNs with non-zero payloads and preferred
 serialization is not used, then the single and double precision quiet
 NaNs, 0xFA7FC00000 and 0xFB7FF0000000000000, may also be used.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-5">NaN payloads have been in the IEEE-754 standard since 2008, but
-programming environments often still do not provide facilities (e.g.,
-APIs) to make use of them.
-For example, in C there is the isnan() API to check if a value is a
-NaN, but there are no APIs to construct or access the NaN payload.
-The typical way to work with a NaN payload is to reinterpret the
-floating-point value as an unsigned integer and then use shifts and
-masks to unpack the IEEE-754 representation.<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
-<div id="nan-implementation-details">
+<div id="working-with-nans">
 <section id="appendix-A.1.1">
-          <h4 id="name-nan-implementation-details">
-<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-nan-implementation-details" class="section-name selfRef">NaN Implementation Details</a>
+          <h4 id="name-working-with-nans">
+<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-working-with-nans" class="section-name selfRef">Working with NaNs</a>
           </h4>
-<p id="appendix-A.1.1-1">This section is primarily for CBOR library implementors.<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-2">CBOR attempts to limit the MUSTs about CBOR implementations in order
+<p id="appendix-A.1.1-1">NaN payloads have been in the IEEE-754 standard since 2008, but
+programming environments often still do not provide facilities (e.g.,
+APIs) to make full use of them.
+In C there is the <code>isnan()</code> API to check if a value is a
+NaN, but there are only implementation-defined APIs to construct or
+access the NaN payload <span>[<a href="#C23" class="cite xref">C23</a>]</span>.
+For constructing a NaN with a payload, C for instance offers functions
+specific to a floating point type, such as <code>nanf()</code> for single
+precision (binary32) and <code>nan()</code> for double precision (binary64), or
+their analogues in the <code>strtof()</code> and <code>strtol()</code> functions.
+Section 7.24.1.5 and its Footnote 341 helpfully explain:<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
+<blockquote id="appendix-A.1.1-2">
+            <p id="appendix-A.1.1-2.1">[...] the meaning of the n-char sequence is
+implementation-defined. [...]
+An implementation can use the
+n-char sequence to determine extra information to be represented in
+the NaN’s significand.<a href="#appendix-A.1.1-2.1" class="pilcrow">¶</a></p>
+</blockquote>
+<p id="appendix-A.1.1-3">While Section 9.7 of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> now defines abstract APIs for creating and
+accessing NaN values (<code>getPayload</code>/<code>setPayload</code>), these definitions
+are partially implementation-defined and are vague enough that
+realizations of them have not made it into <span>[<a href="#C23" class="cite xref">C23</a>]</span>.<a href="#appendix-A.1.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-4">The typical way to work with a NaN payload in C instead is to
+reinterpret the floating-point value as an unsigned integer and then
+use shifts and masks to unpack the IEEE-754 representation.<a href="#appendix-A.1.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.1-5">The floating point conversion (narrowing/widening) instructions of the
+most widely used CPU architectures cover NaNs in a comparable way as
+they convert finite numbers: They narrow by removing the right-most
+bits of the payload, and they widen by adding zero bits to the right.
+(E.g., for ARM A-profile Architecture <span>[<a href="#ARM" class="cite xref">ARM</a>]</span>:
+See Section J1.3.3.193 FPConvertNaN, page 14208 at the time of writing.)<a href="#appendix-A.1.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="nan-implementation-details">
+<section id="appendix-A.1.2">
+          <h4 id="name-nan-implementation-details">
+<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-nan-implementation-details" class="section-name selfRef">NaN Implementation Details</a>
+          </h4>
+<p id="appendix-A.1.2-1">This section is primarily for CBOR library implementors.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-2">CBOR attempts to limit the MUSTs about CBOR implementations in order
 to allow its use in a large variety of constrained use cases.
 For example, support for integers is not required because a protocol
 might need only strings.
 Similarly, there is no <span class="bcp14">MUST</span> that requires support of NaN and NaNs with
 non-zero payloads, but the recommendation here is that any generic
 CBOR library that supports floating-point support NaNs, preferably
-also with non-zero NaN payloads.<a href="#appendix-A.1.1-2" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-3">In most environments, there is little extra work to do to support NaN
+also with non-zero NaN payloads.<a href="#appendix-A.1.2-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-3">In most environments, there is little extra work to do to support NaN
 without payloads if floating-point is supported.
-NaNs will usually flow through as any other floating-point value.<a href="#appendix-A.1.1-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-4">Generic CBOR libraries are expected to support preferred serialization
+NaNs will usually flow through as any other floating-point value.<a href="#appendix-A.1.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-4">Generic CBOR libraries are expected to support preferred serialization
 of floating-point including NaNs.
 For NaNs with zero payloads, this requires reducing to a half-precision
 NaN without a payload.
 This requires a few explicit extra lines of code.
-See the sample half-precision implementation in Appendix D of RFC 8949.<a href="#appendix-A.1.1-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-5">The implementation of preferred serialization of NaN payloads needs a
+See the sample half-precision implementation in Appendix D of RFC 8949.<a href="#appendix-A.1.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-5">The implementation of preferred serialization of NaN payloads needs a
 few more additional lines.
 As with preferred serialization, NaN payloads must be reduced but only
 if they can be reduced without the loss of any non-zero payload bits.
 Programming platform provided floating-point hardware and software may
 or may not do this correctly for double to single conversion.
 The sample half-precision implementation in Appendix D of RFC 8949
-only supports NaNs without payloads.<a href="#appendix-A.1.1-5" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-6">A double precision NaN payload contains 51 bits, a single 22 bits and
+only supports NaNs without payloads.<a href="#appendix-A.1.2-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-6">A double precision NaN payload contains 51 bits, a single 22 bits and
 a half 9 bits, in each case all but the first bit of the significand.
 A double precision NaN can be reduced to a single precision NaN only if the right-most 29 payload bits are zero.
 A single precision NaN can be reduced to a half precision NaN only if the right-most 13 payload bits are zero.
 A double NaN can be reduced to a half precision NaN only if the right-most 42 payload bits are zero.
 Note that the exponent is always all-ones for NaN, so this is simpler
-than the equivalent contraction of regular, non-NAN, floating-point values.<a href="#appendix-A.1.1-6" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-7">To implement the above, most CBOR libraries will have to reinterpret
+than the equivalent contraction of regular, non-NAN, floating-point values.<a href="#appendix-A.1.2-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-7">To implement the above, most CBOR libraries will have to reinterpret
 the floating point value as an unsigned integer and use shifts and
-masks, based in the internal representation defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A.1.1-7" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-8">Testing on some CPUs has shown them to do this correctly for conversion between single and double.
+masks, based in the internal representation defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A.1.2-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-8">Testing on some CPUs has shown them to do this correctly for conversion between single and double.
 However, it may not be very useful to rely on platform libraries for the following reasons.
 First, they may provide no support at all for half-precision and half-precision is required for preferred serialization.
 Second, NaN payloads are a relatively recent and very specialist
-feature that is not usually used in interchange.<a href="#appendix-A.1.1-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-9">If platform implementation is relied upon, NaN payload reduction should be tested on each platform.
+feature that is not usually used in interchange.<a href="#appendix-A.1.2-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.2-9">If platform implementation is relied upon, NaN payload reduction should be tested on each platform.
 Open source libraries intended to run on multiple platforms may be
-better off not relying on the platform.<a href="#appendix-A.1.1-9" class="pilcrow">¶</a></p>
+better off not relying on the platform.<a href="#appendix-A.1.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="nan-tests-examples">
-<section id="appendix-A.1.2">
+<section id="appendix-A.1.3">
           <h4 id="name-nan-tests-examples">
-<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-nan-tests-examples" class="section-name selfRef">NaN Tests Examples</a>
+<a href="#appendix-A.1.3" class="section-number selfRef">A.1.3. </a><a href="#name-nan-tests-examples" class="section-name selfRef">NaN Tests Examples</a>
           </h4>
-<p id="appendix-A.1.2-1">The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
+<p id="appendix-A.1.3-1">The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
 (binary32) unsigned integer in hex to show the bits that make up the
 floating-point value.
-All of the following are NaNs.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
+All of the following are NaNs.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a></p>
 <span id="name-examples-for-preferred-seri"></span><div id="nan-examples">
 <table class="center" id="table-2">
             <caption>

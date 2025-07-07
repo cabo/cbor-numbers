@@ -4,8 +4,8 @@
 
 Concise Binary Object Representation Maint&Ext                C. Bormann
 Internet-Draft                                    Universität Bremen TZI
-Intended status: Informational                             13 March 2025
-Expires: 14 September 2025
+Intended status: Informational                               7 July 2025
+Expires: 8 January 2026
 
 
                            On Numbers in CBOR
@@ -53,9 +53,9 @@ About This Document
 
 
 
-Bormann                 Expires 14 September 2025               [Page 1]
+Bormann                  Expires 8 January 2026                 [Page 1]
 
-Internet-Draft                CBOR Numbers                    March 2025
+Internet-Draft                CBOR Numbers                     July 2025
 
 
 Status of This Memo
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 September 2025.
+   This Internet-Draft will expire on 8 January 2026.
 
 Copyright Notice
 
@@ -98,31 +98,32 @@ Table of Contents
      3.1.  Integer vs. Floating Point  . . . . . . . . . . . . . . .   6
      3.2.  Considerations for non-finite numbers and non-numbers . .   6
        3.2.1.  Protocol Design Considerations  . . . . . . . . . . .   7
-       3.2.2.  Implementation Considerations . . . . . . . . . . . .   8
+       3.2.2.  Implementation Considerations . . . . . . . . . . . .   9
    4.  Other Floating Point Numbers  . . . . . . . . . . . . . . . .  10
-   5.  Tagged Arrays of Numbers  . . . . . . . . . . . . . . . . . .  10
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
+   5.  Tagged Arrays of Numbers  . . . . . . . . . . . . . . . . . .  11
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  11
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  11
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  12
 
 
 
-Bormann                 Expires 14 September 2025               [Page 2]
+Bormann                  Expires 8 January 2026                 [Page 2]
 
-Internet-Draft                CBOR Numbers                    March 2025
+Internet-Draft                CBOR Numbers                     July 2025
 
 
    Appendix A.  Implementers' Checklists for Floating Point
-           Values  . . . . . . . . . . . . . . . . . . . . . . . . .  12
-     A.1.  NaN Payloads  . . . . . . . . . . . . . . . . . . . . . .  13
-       A.1.1.  NaN Implementation Details  . . . . . . . . . . . . .  14
-       A.1.2.  NaN Tests Examples  . . . . . . . . . . . . . . . . .  15
-   List of Tables  . . . . . . . . . . . . . . . . . . . . . . . . .  16
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  17
-   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .  17
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
+           Values  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     A.1.  NaN Payloads  . . . . . . . . . . . . . . . . . . . . . .  14
+       A.1.1.  Working with NaNs . . . . . . . . . . . . . . . . . .  15
+       A.1.2.  NaN Implementation Details  . . . . . . . . . . . . .  16
+       A.1.3.  NaN Tests Examples  . . . . . . . . . . . . . . . . .  17
+   List of Tables  . . . . . . . . . . . . . . . . . . . . . . . . .  18
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  19
+   Contributors  . . . . . . . . . . . . . . . . . . . . . . . . . .  19
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction
 
@@ -157,18 +158,19 @@ Internet-Draft                CBOR Numbers                    March 2025
    *  Encoding efficiency (number of bytes needed), possibly processing
       efficiency (CPU used in processing)
 
-   *  Preferred Serialization, Common Deterministic Encoding Profile
-      (CDE, [I-D.ietf-cbor-cde], see also [I-D.bormann-cbor-det] for
-      more background discussion)
+   *  Preferred Serialization, Common Deterministic Encoding (CDE,
+      [I-D.ietf-cbor-cde], see also [I-D.bormann-cbor-det] for more
+      background discussion)
+
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 3]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
    *  Use by applications
-
-
-
-Bormann                 Expires 14 September 2025               [Page 3]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
    *  Interoperability considerations, potential "dark corners"
 
@@ -206,6 +208,24 @@ Internet-Draft                CBOR Numbers                    March 2025
    tag 2/3 automatically, in practice biguint and unsigned are the same
    type, as are bigint and integer.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 4]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
    The Major type 0 numbers come in five different encoding sizes, as
    indicated by their initial byte: immediate ("1+0") encoding (0..23),
    one-byte ("1+1") (0..255), two-byte ("1+2", 0..65535), four-byte, and
@@ -217,14 +237,6 @@ Internet-Draft                CBOR Numbers                    March 2025
    always uses major type 0 over tag 2 when possible, and the shortest
    encoding of these (and thus no leading zero bytes for the tagged
    encodings).  Major type 1 and tag 3 are analogous.
-
-
-
-
-Bormann                 Expires 14 September 2025               [Page 4]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
    Note that there is no "signed type" in CBOR: as any specific number
    to be represented is either negative or not, it is represented as an
@@ -262,25 +274,19 @@ Internet-Draft                CBOR Numbers                    March 2025
    CBOR directly supports the three formats binary16, binary32, and
    binary64, i.e., the signed binary floating point formats in 16, 32,
    and 64 bits, colloquially known as half (16 bits), single (32 bits),
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 5]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
    and double (64 bits) precision.  Most platforms that support floating
    point computation support at least single precision, except for the
    most constrained ones also double precision, while half precision is
    mostly used for storage and interchange only and may be software-
    supported only.
-
-
-
-
-
-
-
-
-
-
-Bormann                 Expires 14 September 2025               [Page 5]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
 3.1.  Integer vs. Floating Point
 
@@ -294,8 +300,9 @@ Internet-Draft                CBOR Numbers                    March 2025
    For specific applications, it may be desirable to represent all
    numbers that can be represented as integers as such, even if they are
    used where floating point numbers are used for non-integers.
-   [I-D.mcnally-deterministic-cbor] defines a CDE application profile
-   that enforces this for a certain subset of the integers.
+   [I-D.mcnally-deterministic-cbor] defines application-level
+   deterministic representation rules that can be used with CDE to
+   enforce this for a certain subset of the integers.
 
    Most CBOR applications so far have tended to get by with the kind of
    strong separation between the integer and floating point worlds that
@@ -323,20 +330,18 @@ Internet-Draft                CBOR Numbers                    March 2025
       represent computations that didn't lead to a numeric result, not
       even an infinity.  A commonly implemented example for such a
       computation is 0.0/0.0.  The formats provide a way to include
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 6]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
       additional information with a NaN, such as its sign bit, whether
       operations on the NaN are intended to fail immediately (signaling)
       or just return another NaN (quiet), and some remaining bits that
       may carry additional information (intended as diagnostic).
-
-
-
-
-
-
-Bormann                 Expires 14 September 2025               [Page 6]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
       It can be surprising that according to [IEEE754], NaN values
       always compare as different even if they have the same NaN
@@ -374,7 +379,37 @@ Internet-Draft                CBOR Numbers                    March 2025
    rely on NaN information being successfully preserved during
    interchange.
 
-JSON Compatibility
+
+
+
+
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 7]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
+3.2.1.1.  Use Cases for Full Support of NaN Values
+
+   Given the dark corners mentioned, a CBOR implementer might question
+   whether there even are good use cases for full NaN support.  The
+   author conjectures that the main use case will be moving existing
+   complex algorithms from a monolithic implementation to a distributed
+   one.  A data representation format is generally needed for this, and
+   CBOR may be a good choice if the target environment is not entirely
+   homogeneous.  Since existing algorithms may make use of IEEE 754
+   including its NaN values, full support for inserting CBOR
+   intermediate representation into an algorithm implies full support
+   for NaNs.  (This also means that the main objective for such
+   implementations is full data transparency, not necessary great
+   internal APIs for dealing with the data — IEEE 754 is that API!)
+
+3.2.1.2.  JSON Compatibility
 
    Note that JSON supports neither infinite numbers nor NaN.  For
    protocols that are intended to work in both CBOR and JSON
@@ -386,13 +421,6 @@ JSON Compatibility
 
    Additional choices can be added for the infinities (e.g., false and
    true, to stay within the CBOR simple values), if required.
-
-
-
-Bormann                 Expires 14 September 2025               [Page 7]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
    Since null, false and true have single-byte representations, the
    replacement of NaN, −Infinity, and (positive) Infinity by these
@@ -410,6 +438,17 @@ Internet-Draft                CBOR Numbers                    March 2025
    For JSON, the byte string can be base16- or base64-encoded, or it can
    be represented by an integer, preserving its left-aligned nature, or
    even as a (tagged) floating point value with a different exponent.
+
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 8]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
 3.2.2.  Implementation Considerations
 
@@ -440,16 +479,6 @@ Internet-Draft                CBOR Numbers                    March 2025
    carries a leading quiet bit with the rest of the bits allocated to
    the NaN payload.
 
-
-
-
-
-
-Bormann                 Expires 14 September 2025               [Page 8]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
-
    To qualify as a generic encoder or decoder, a CBOR library needs to
    implement as much of [IEEE754] support as reasonably possible on the
    platform it addresses.  What is reasonably possible depends on:
@@ -464,6 +493,18 @@ Internet-Draft                CBOR Numbers                    March 2025
       E.g., the implementation may support a single NaN value
       consistently, but not preserve NaN information present in the NaN
       values.
+
+
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                 [Page 9]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
    Where an implementation needs to convert between different floating
    point formats, e.g., because not all formats are fully supported by
@@ -491,21 +532,6 @@ Internet-Draft                CBOR Numbers                    March 2025
       -  truncate the significand from the right; check if the removed
          bits were all zero.
 
-
-
-
-
-
-
-
-
-
-
-Bormann                 Expires 14 September 2025               [Page 9]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
-
    If the contraction is optional, e.g., for Preferred Serialization, do
    not perform the contraction if the removed bits in the significand
    truncation aren't all zero.  If the contraction is required to fit
@@ -528,11 +554,19 @@ Internet-Draft                CBOR Numbers                    March 2025
    into a generic encoder.  Because of this flexibility, tags 4 and 5 do
    not define a Preferred Serialization or a deterministic encoding.
 
-   Section 3.2 of [I-D.ietf-cbor-time-tag] uses representations derived
-   from the tags 4 and 5 to represent timestamps.  Section 6.1 of
-   [I-D.ietf-cbor-time-tag] lists various other tags that can be used
-   for representing numbers for advanced arithmetic, including rational
-   numbers in fraction form (tag 30).
+
+
+
+Bormann                  Expires 8 January 2026                [Page 10]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
+   Section 3.2 of [RFC9581] uses representations derived from the tags 4
+   and 5 to represent timestamps.  Section 6.1 of [RFC9581] lists
+   various other tags that can be used for representing numbers for
+   advanced arithmetic, including rational numbers in fraction form (tag
+   30).
 
 5.  Tagged Arrays of Numbers
 
@@ -555,13 +589,6 @@ Internet-Draft                CBOR Numbers                    March 2025
 
    (TODO)
 
-
-
-Bormann                 Expires 14 September 2025              [Page 10]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
-
 7.  IANA Considerations
 
    (TODO:
@@ -580,6 +607,16 @@ Internet-Draft                CBOR Numbers                    March 2025
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 11]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
               Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -600,6 +637,11 @@ Internet-Draft                CBOR Numbers                    March 2025
               DOI 10.17487/RFC8746, February 2020,
               <https://www.rfc-editor.org/rfc/rfc8746>.
 
+   [RFC9581]  Bormann, C., Gamari, B., and H. Birkholz, "Concise Binary
+              Object Representation (CBOR) Tags for Time, Duration, and
+              Period", RFC 9581, DOI 10.17487/RFC9581, August 2024,
+              <https://www.rfc-editor.org/rfc/rfc9581>.
+
    [STD94]    Internet Standard 94,
               <https://www.rfc-editor.org/info/std94>.
               At the time of writing, this STD comprises the following:
@@ -611,11 +653,25 @@ Internet-Draft                CBOR Numbers                    March 2025
 
 8.2.  Informative References
 
+   [ARM]      Arm Limited, "Arm Architecture Reference Manual for
+              A-profile architecture", April 2025,
+              <https://developer.arm.com/documentation/ddi0487/latest/>.
+
+   [C23]      International Organization for Standardization,
+              "Information technology — Programming languages — C", ISO/
+              IEC 9899:2024, October 2024,
+              <https://www.iso.org/standard/82075.html>.  This revision
+              of the standard is widely known as C23.  Technically
+              equivalent specification text is available at
+              https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf
+              (https://www.open-std.org/jtc1/sc22/wg14/www/docs/
+              n3220.pdf).
 
 
-Bormann                 Expires 14 September 2025              [Page 11]
+
+Bormann                  Expires 8 January 2026                [Page 12]
 
-Internet-Draft                CBOR Numbers                    March 2025
+Internet-Draft                CBOR Numbers                     July 2025
 
 
    [Cplusplus20]
@@ -633,17 +689,9 @@ Internet-Draft                CBOR Numbers                    March 2025
 
    [I-D.ietf-cbor-cde]
               Bormann, C., "CBOR Common Deterministic Encoding (CDE)",
-              Work in Progress, Internet-Draft, draft-ietf-cbor-cde-08,
-              10 February 2025, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-cbor-cde-08>.
-
-   [I-D.ietf-cbor-time-tag]
-              Bormann, C., Gamari, B., and H. Birkholz, "Concise Binary
-              Object Representation (CBOR) Tags for Time, Duration, and
-              Period", Work in Progress, Internet-Draft, draft-ietf-
-              cbor-time-tag-12, 30 October 2023,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-cbor-
-              time-tag-12>.
+              Work in Progress, Internet-Draft, draft-ietf-cbor-cde-11,
+              12 May 2025, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-cbor-cde-11>.
 
    [I-D.mcnally-deterministic-cbor]
               McNally, W., Allen, C., Bormann, C., and L. Lundblade,
@@ -666,14 +714,6 @@ Appendix A.  Implementers' Checklists for Floating Point Values
       0x19), single precision (binary32, ai = 0x1a) and double precision
       (binary64, ai = 0x1b).
 
-
-
-
-Bormann                 Expires 14 September 2025              [Page 12]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
-
       For preferred serialization: if multiple of these encodings
       preserve the precision of the value to be encoded, only the
       shortest form of these MUST be emitted.  That implies that
@@ -681,6 +721,14 @@ Internet-Draft                CBOR Numbers                    March 2025
       more than half precision on the platform) single-precision
       floating point.  Positive and negative infinity and zero MUST be
       represented in half-precision floating point.
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 13]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
    *  NaNs MUST be supported, for all values of NaN information allowed
       in [IEEE754].
@@ -717,22 +765,26 @@ Internet-Draft                CBOR Numbers                    March 2025
 
 A.1.  NaN Payloads
 
-   An IEEE-754 data item has up to 52 bits in the significand.  For a
-   NaN, the first of these bits is used to indicate whether the NaN is
-   signalling (0) or quiet (1).  The up to 51 bits in the rest of the
-   significand are called the "NAN payload".
-
-
-
-
-Bormann                 Expires 14 September 2025              [Page 13]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
+   The basic data model of CBOR directly supports IEEE-754 data item of
+   the forms binary16, binary32, and binary64.  These have 10, 23, and
+   52 bits in the space provided for encoding the significand (see
+   Table 1).  For a NaN, the first of these bits is used to indicate
+   whether the NaN is signalling (0) or quiet (1).  The up to 51 bits in
+   the rest of the significand are called the "NAN payload".
 
    The payload’s original purpose is diagnostic information to explain
    why a NaN was generated by a local computation.  There is no standard
    for the contents of a NaN payload.
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 14]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
 
    CBOR allows NaNs with non-zero payloads to be encoded.  (Due to the
    way infinite numbers are encoded in [IEEE754], zero-payload NaN
@@ -746,16 +798,51 @@ Internet-Draft                CBOR Numbers                    March 2025
    single and double precision quiet NaNs, 0xFA7FC00000 and
    0xFB7FF0000000000000, may also be used.
 
+A.1.1.  Working with NaNs
+
    NaN payloads have been in the IEEE-754 standard since 2008, but
    programming environments often still do not provide facilities (e.g.,
-   APIs) to make use of them.  For example, in C there is the isnan()
-   API to check if a value is a NaN, but there are no APIs to construct
-   or access the NaN payload.  The typical way to work with a NaN
-   payload is to reinterpret the floating-point value as an unsigned
-   integer and then use shifts and masks to unpack the IEEE-754
-   representation.
+   APIs) to make full use of them.  In C there is the isnan() API to
+   check if a value is a NaN, but there are only implementation-defined
+   APIs to construct or access the NaN payload [C23].  For constructing
+   a NaN with a payload, C for instance offers functions specific to a
+   floating point type, such as nanf() for single precision (binary32)
+   and nan() for double precision (binary64), or their analogues in the
+   strtof() and strtol() functions.  Section 7.24.1.5 and its Footnote
+   341 helpfully explain:
 
-A.1.1.  NaN Implementation Details
+   |  [...] the meaning of the n-char sequence is implementation-
+   |  defined. [...] An implementation can use the n-char sequence to
+   |  determine extra information to be represented in the NaN’s
+   |  significand.
+
+   While Section 9.7 of [IEEE754] now defines abstract APIs for creating
+   and accessing NaN values (getPayload/setPayload), these definitions
+   are partially implementation-defined and are vague enough that
+   realizations of them have not made it into [C23].
+
+   The typical way to work with a NaN payload in C instead is to
+   reinterpret the floating-point value as an unsigned integer and then
+   use shifts and masks to unpack the IEEE-754 representation.
+
+   The floating point conversion (narrowing/widening) instructions of
+   the most widely used CPU architectures cover NaNs in a comparable way
+   as they convert finite numbers: They narrow by removing the right-
+   most bits of the payload, and they widen by adding zero bits to the
+   right.  (E.g., for ARM A-profile Architecture [ARM]: See
+   Section J1.3.3.193 FPConvertNaN, page 14208 at the time of writing.)
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 15]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
+A.1.2.  NaN Implementation Details
 
    This section is primarily for CBOR library implementors.
 
@@ -777,14 +864,6 @@ A.1.1.  NaN Implementation Details
    payloads, this requires reducing to a half-precision NaN without a
    payload.  This requires a few explicit extra lines of code.  See the
    sample half-precision implementation in Appendix D of RFC 8949.
-
-
-
-
-Bormann                 Expires 14 September 2025              [Page 14]
-
-Internet-Draft                CBOR Numbers                    March 2025
-
 
    The implementation of preferred serialization of NaN payloads needs a
    few more additional lines.  As with preferred serialization, NaN
@@ -810,6 +889,15 @@ Internet-Draft                CBOR Numbers                    March 2025
    the floating point value as an unsigned integer and use shifts and
    masks, based in the internal representation defined in [IEEE754].
 
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 16]
+
+Internet-Draft                CBOR Numbers                     July 2025
+
+
    Testing on some CPUs has shown them to do this correctly for
    conversion between single and double.  However, it may not be very
    useful to rely on platform libraries for the following reasons.
@@ -823,7 +911,7 @@ Internet-Draft                CBOR Numbers                    March 2025
    run on multiple platforms may be better off not relying on the
    platform.
 
-A.1.2.  NaN Tests Examples
+A.1.3.  NaN Tests Examples
 
    The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
    (binary32) unsigned integer in hex to show the bits that make up the
@@ -837,9 +925,33 @@ A.1.2.  NaN Tests Examples
 
 
 
-Bormann                 Expires 14 September 2025              [Page 15]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bormann                  Expires 8 January 2026                [Page 17]
 
-Internet-Draft                CBOR Numbers                    March 2025
+Internet-Draft                CBOR Numbers                     July 2025
 
 
     +====================+======================+=====================+
@@ -893,9 +1005,9 @@ List of Tables
 
 
 
-Bormann                 Expires 14 September 2025              [Page 16]
+Bormann                  Expires 8 January 2026                [Page 18]
 
-Internet-Draft                CBOR Numbers                    March 2025
+Internet-Draft                CBOR Numbers                     July 2025
 
 
 Acknowledgments
@@ -949,4 +1061,4 @@ Author's Address
 
 
 
-Bormann                 Expires 14 September 2025              [Page 17]
+Bormann                  Expires 8 January 2026                [Page 19]
