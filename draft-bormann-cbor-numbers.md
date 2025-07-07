@@ -47,8 +47,10 @@ normative:
       IEEE Std: 754-2019
       DOI: 10.1109/IEEESTD.2019.8766229
   RFC8610: cddl
+  RFC9581: time-tag
 
 informative:
+#  I-D.bormann-cbor-numbers: this
   I-D.ietf-cbor-cde: cde
   I-D.bormann-cbor-det: det
   I-D.mcnally-deterministic-cbor: dcbor-orig
@@ -64,7 +66,7 @@ informative:
 #    - Edition 7
 #    annotation: >
 #       
-#      The standard is widely known as C++23.
+#      This revision of the standard is widely known as C++23.
 #      Its technical content is also available via
 #      <https://open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf>.
   Cplusplus20:
@@ -77,6 +79,27 @@ informative:
       ISO/IEC: ISO/IEC JTC1 SC22 WG21 N 4860
     refcontent:
     - Sixth Edition
+  C23:
+    author:
+    - org: International Organization for Standardization
+    title: >
+      Information technology — Programming languages — C
+    date: October 2024
+    target: https://www.iso.org/standard/82075.html
+    seriesinfo:
+      ISO/IEC: 9899:2024
+    ann: >
+       
+      This revision of the standard is widely known as C23.
+      Technically equivalent specification text is available at
+      <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf>.
+  ARM:
+    target: https://developer.arm.com/documentation/ddi0487/latest/
+    title: Arm Architecture Reference Manual for A-profile architecture
+    author:
+      org: Arm Limited
+    date: 30 April 2025
+
 
 --- abstract
 
@@ -125,7 +148,7 @@ These sections will generally address considerations such as:
 
 * Encoding efficiency (number of bytes needed), possibly processing
   efficiency (CPU used in processing)
-* Preferred Serialization, Common Deterministic Encoding Profile (CDE,
+* Preferred Serialization, Common Deterministic Encoding (CDE,
   {{-cde}}, see also {{-det}} for more background discussion)
 * Use by applications
 * Interoperability considerations, potential "dark corners"
@@ -227,7 +250,8 @@ being the original JavaScript language, which only had one number type).
 For specific applications, it may be desirable to represent all
 numbers that can be represented as integers as such, even if they are
 used where floating point numbers are used for non-integers.
-{{-dcbor-orig}} defines a CDE application profile that enforces this for
+{{-dcbor-orig}} defines application-level deterministic representation
+rules that can be used with CDE to enforce this for
 a certain subset of the integers.
 
 Most CBOR applications so far have tended to get by with the kind of
@@ -298,8 +322,23 @@ want to implement replacements for infinite numbers and NaNs, or at
 least not rely on NaN information being successfully preserved during
 interchange.
 
+#### Use Cases for Full Support of NaN Values
+
+Given the dark corners mentioned, a CBOR implementer might question
+whether there even are good use cases for full NaN support.
+The author conjectures that the main use case will be moving existing
+complex algorithms from a monolithic implementation to a distributed one.
+A data representation format is generally needed for this, and CBOR
+may be a good choice if the target environment is not entirely
+homogeneous.
+Since existing algorithms may make use of IEEE 754 including its NaN
+values, full support for inserting CBOR intermediate representation
+into an algorithm implies full support for NaNs.
+(This also means that the main objective for such implementations is
+full data transparency, not necessary great internal APIs for dealing
+with the data — IEEE 754 is that API!)
+
 #### JSON Compatibility
-{:unnumbered}
 
 Note that JSON supports neither infinite numbers nor NaN.
 For protocols that are intended to work in both CBOR and JSON
@@ -324,7 +363,9 @@ application-oriented representation of that information, or simply
 with a (left-aligned, truncating trailing zero bytes) byte string
 representing those bits:
 
+~~~ cddl
 float-with-nan-replacement = float / bytes
+~~~
 
 For JSON, the byte string can be base16- or base64-encoded, or it can
 be represented by an integer, preserving its left-aligned nature, or
@@ -408,9 +449,9 @@ of ways they could be integrated into a generic encoder.
 Because of this flexibility, tags 4 and 5 do not define a Preferred
 Serialization or a deterministic encoding.
 
-{{Section 3.2 of ?I-D.ietf-cbor-time-tag}} uses representations derived
+{{Section 3.2 of -time-tag}} uses representations derived
 from the tags 4 and 5 to represent timestamps.
-{{Section 6.1 of ?I-D.ietf-cbor-time-tag}} lists various other tags that
+{{Section 6.1 of -time-tag}} lists various other tags that
 can be used for representing numbers for advanced arithmetic,
 including rational numbers in fraction form (tag 30).
 
@@ -499,7 +540,10 @@ point values in a generic decoder that supports IEEE 754 floating-point numbers:
 
 ## NaN Payloads {#app-nan}
 
-An IEEE-754 data item has up to 52 bits in the significand.
+The basic data model of CBOR directly supports IEEE-754 data item of
+the forms binary16, binary32, and binary64.
+These have 10, 23, and 52 bits in the space provided for encoding the
+significand (see {{tab-bits}}).
 For a NaN, the first of these bits is used to indicate whether the NaN
 is signalling (0) or quiet (1).
 The up to 51 bits in the rest of the significand are called the "NAN
@@ -521,14 +565,43 @@ If a design does not use NaNs with non-zero payloads and preferred
 serialization is not used, then the single and double precision quiet
 NaNs, 0xFA7FC00000 and 0xFB7FF0000000000000, may also be used.
 
+### Working with NaNs
+
 NaN payloads have been in the IEEE-754 standard since 2008, but
 programming environments often still do not provide facilities (e.g.,
-APIs) to make use of them.
-For example, in C there is the isnan() API to check if a value is a
-NaN, but there are no APIs to construct or access the NaN payload.
-The typical way to work with a NaN payload is to reinterpret the
-floating-point value as an unsigned integer and then use shifts and
-masks to unpack the IEEE-754 representation.
+APIs) to make full use of them.
+In C there is the `isnan()` API to check if a value is a
+NaN, but there are only implementation-defined APIs to construct or
+access the NaN payload {{C23}}.
+For constructing a NaN with a payload, C for instance offers functions
+specific to a floating point type, such as `nanf()` for single
+precision (binary32) and `nan()` for double precision (binary64), or
+their analogues in the `strtof()` and `strtol()` functions.
+Section 7.24.1.5 and its Footnote 341 helpfully explain:
+
+{:quote}
+>
+\[...] the meaning of the n-char sequence is
+implementation-defined. \[...]
+An implementation can use the
+n-char sequence to determine extra information to be represented in
+the NaN’s significand.
+
+While Section 9.7 of {{IEEE754}} now defines abstract APIs for creating and
+accessing NaN values (`getPayload`/`setPayload`), these definitions
+are partially implementation-defined and are vague enough that
+realizations of them have not made it into {{C23}}.
+
+The typical way to work with a NaN payload in C instead is to
+reinterpret the floating-point value as an unsigned integer and then
+use shifts and masks to unpack the IEEE-754 representation.
+
+The floating point conversion (narrowing/widening) instructions of the
+most widely used CPU architectures cover NaNs in a comparable way as
+they convert finite numbers: They narrow by removing the right-most
+bits of the payload, and they widen by adding zero bits to the right.
+(E.g., for ARM A-profile Architecture {{ARM}}:
+See Section J1.3.3.193 FPConvertNaN, page 14208 at the time of writing.)
 
 ### NaN Implementation Details
 
