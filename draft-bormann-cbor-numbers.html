@@ -12,33 +12,32 @@ possibility of extremely small code size, fairly small message
 size, and extensibility without the need for version negotiation. 
        Among the kinds of data that a data representation format needs to be
 able to carry, numbers have a prominent role, but also have
-inherent complexity that needs attention from protocol designers
-and implementers of CBOR
-libraries and of the applications that use them. 
+inherent complexity that needs attention from protocol designers,
+from implementers of CBOR
+libraries, and from implementers of the applications that use them. 
        This document gives an overview over number formats available in
 CBOR and some notable CBOR tags registered, and it attempts to
 provide information about opportunities and potential pitfalls of these
 number formats. 
-       This is a rather drafty initial revision, pieced
+       This is still rather drafty, pieced
 together from various components, so it has a higher level of
 redundancy than ultimately desired. 
     " name="description">
-<meta content="xml2rfc 3.29.0" name="generator">
+<meta content="xml2rfc 3.31.0" name="generator">
 <meta content="draft-bormann-cbor-numbers-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.29.0
-    Python 3.12.11
+  xml2rfc 3.31.0
+    Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
-    intervaltree 3.1.0
+    intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 5.3.1
-    platformdirs 4.3.8
+    lxml 6.0.2
+    platformdirs 4.5.1
     pycountry 24.6.1
-    PyYAML 6.0.2
-    requests 2.32.4
-    setuptools 80.9.0
-    wcwidth 0.2.13
+    PyYAML 6.0.3
+    requests 2.32.5
+    wcwidth 0.3.0
 -->
 <link href="draft-bormann-cbor-numbers.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -179,7 +178,7 @@ redundancy than ultimately desired.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -187,7 +186,8 @@ redundancy than ultimately desired.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -579,6 +579,7 @@ aside, blockquote {
 }
 blockquote {
   margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
 }
 cite {
   display: block;
@@ -649,7 +650,7 @@ a.pilcrow {
   }
 }
 @media not print {
-  :hover > a.pilcrow {
+  :hover > a.pilcrow, a.pilcrow:focus {
     opacity: 1;
   }
   a.pilcrow[href]:hover {
@@ -1057,11 +1058,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">CBOR Numbers</td>
-<td class="right">July 2025</td>
+<td class="right">March 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Bormann</td>
-<td class="center">Expires 8 January 2026</td>
+<td class="center">Expires 2 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1074,12 +1075,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-bormann-cbor-numbers-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-07-07" class="published">7 July 2025</time>
+<time datetime="2026-03-01" class="published">1 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-01-08">8 January 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-02">2 September 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1097,14 +1098,14 @@ possibility of extremely small code size, fairly small message
 size, and extensibility without the need for version negotiation.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">Among the kinds of data that a data representation format needs to be
 able to carry, numbers have a prominent role, but also have
-inherent complexity that needs attention from protocol designers
-and implementers of CBOR
-libraries and of the applications that use them.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+inherent complexity that needs attention from protocol designers,
+from implementers of CBOR
+libraries, and from implementers of the applications that use them.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 <p id="section-abstract-3">This document gives an overview over number formats available in
 CBOR and some notable CBOR tags registered, and it attempts to
 provide information about opportunities and potential pitfalls of these
 number formats.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
-<p id="section-abstract-4"><span class="cref" id="disclaimer">This is a rather drafty initial revision, pieced
+<p id="section-abstract-4"><span class="cref" id="disclaimer">This is still rather drafty, pieced
 together from various components, so it has a higher level of
 redundancy than ultimately desired.</span><a href="#section-abstract-4" class="pilcrow">¶</a></p>
 </section>
@@ -1142,7 +1143,7 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1151,7 +1152,7 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2025 IETF Trust and the persons identified as the
+            Copyright (c) 2026 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1183,7 +1184,7 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-integer-numbers" class="internal xref">Integer Numbers</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-ieee-754-floating-point-num" class="internal xref">IEEE 754 Floating Point Numbers</a></p>
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-ieee-754-floating-point-val" class="internal xref">IEEE 754 Floating Point Values</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
                 <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-integer-vs-floating-point" class="internal xref">Integer vs. Floating Point</a></p>
@@ -1198,6 +1199,9 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
                     <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-implementation-consideratio" class="internal xref">Implementation Considerations</a></p>
 </li>
                 </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-getting-by-without-platform" class="internal xref">Getting by without Platform Support for Floating Point Values</a></p>
 </li>
             </ul>
 </li>
@@ -1225,35 +1229,41 @@ redundancy than ultimately desired.</span><a href="#section-abstract-4" class="p
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implementers-checklists-for" class="internal xref">Implementers' Checklists for Floating Point Values</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-nan-payloads" class="internal xref">NaN Payloads</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.1">
-                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-working-with-nans" class="internal xref">Working with NaNs</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-3232-bit-fixed-point-for-su" class="internal xref">32.32 Bit Fixed Point for Supporting Precision Tag 1 Timestamps</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.2">
-                    <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-nan-implementation-details" class="internal xref">NaN Implementation Details</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-implementers-checklists-for" class="internal xref">Implementers' Checklists for Floating Point Values</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#appendix-B.1" class="auto internal xref">B.1</a>.  <a href="#name-nan-payloads" class="internal xref">NaN Payloads</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1.2.1">
+                    <p id="section-toc.1-1.10.2.1.2.1.1"><a href="#appendix-B.1.1" class="auto internal xref">B.1.1</a>.  <a href="#name-working-with-nans" class="internal xref">Working with NaNs</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.3">
-                    <p id="section-toc.1-1.9.2.1.2.3.1"><a href="#appendix-A.1.3" class="auto internal xref">A.1.3</a>.  <a href="#name-nan-tests-examples" class="internal xref">NaN Tests Examples</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1.2.2">
+                    <p id="section-toc.1-1.10.2.1.2.2.1"><a href="#appendix-B.1.2" class="auto internal xref">B.1.2</a>.  <a href="#name-nan-implementation-details" class="internal xref">NaN Implementation Details</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1.2.3">
+                    <p id="section-toc.1-1.10.2.1.2.3.1"><a href="#appendix-B.1.3" class="auto internal xref">B.1.3</a>.  <a href="#name-nan-tests-examples" class="internal xref">NaN Tests Examples</a></p>
 </li>
                 </ul>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-list-of-tables" class="internal xref">List of Tables</a></p>
-</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-list-of-figures" class="internal xref">List of Figures</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-contributors" class="internal xref">Contributors</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-list-of-tables" class="internal xref">List of Tables</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-F" class="auto internal xref"></a><a href="#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-G" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1269,9 +1279,9 @@ possibility of extremely small code size, fairly small message
 size, and extensibility without the need for version negotiation.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">Among the kinds of data that a data representation format needs to be
 able to carry, numbers have a prominent role, but also have
-inherent complexity that needs attention from protocol designers
-and implementers of CBOR
-libraries and of the applications that use them.<a href="#section-1-2" class="pilcrow">¶</a></p>
+inherent complexity that needs attention from protocol designers,
+from implementers of CBOR
+libraries, and from implementers of the applications that use them.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This document gives an overview over number formats available in
 CBOR and some notable CBOR tags registered, and it attempts to
 provide information about opportunities and potential pitfalls of these
@@ -1282,7 +1292,7 @@ number formats.<a href="#section-1-3" class="pilcrow">¶</a></p>
           <p id="section-1-5.1.1"><a href="#sec-int" class="internal xref">Integer Numbers</a> (<a href="#sec-int" class="auto internal xref">Section 2</a>),<a href="#section-1-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-5.2">
-          <p id="section-1-5.2.1"><a href="#sec-ieee" class="internal xref">IEEE 754 Floating Point Numbers</a> (<a href="#sec-ieee" class="auto internal xref">Section 3</a>),<a href="#section-1-5.2.1" class="pilcrow">¶</a></p>
+          <p id="section-1-5.2.1"><a href="#sec-ieee" class="internal xref">IEEE 754 Floating Point Values</a> (<a href="#sec-ieee" class="auto internal xref">Section 3</a>),<a href="#section-1-5.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-5.3">
           <p id="section-1-5.3.1"><a href="#sec-float" class="internal xref">Other Floating Point Numbers</a> (<a href="#sec-float" class="auto internal xref">Section 4</a>),<a href="#section-1-5.3.1" class="pilcrow">¶</a></p>
@@ -1308,6 +1318,22 @@ efficiency (CPU used in processing)<a href="#section-1-7.1.1" class="pilcrow">¶
           <p id="section-1-7.4.1">Interoperability considerations, potential "dark corners"<a href="#section-1-7.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
+<p id="section-1-8">CBOR defines an interchange format for various kinds of number-like data
+items, some right in <span>[<a href="#STD94" class="cite xref">STD94</a>]</span>, some via the definition of additional
+tags (see also <a href="#sec-float" class="auto internal xref">Section 4</a>).
+Implementations on a specific platform will want to map the
+transferred data items into the data types available on the platform
+or new data types defined by the CBOR implementation.
+The ranges of the various formats provided for numbers in the interchange format are
+not always congruent with the platform types of a specific platform,
+so some design effort may be required to define a platform-specific API.
+Apart from a relatively strong dividing line between integer and
+floating point data items, the interchanged data items make no
+statement on which platform-specific type should be used to ingest the
+item into.
+Designers of CBOR-based protocols can decide to define their application
+data types with a view to platform types that are likely to be
+available on the target platforms.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <div id="conventions-and-definitions">
 <section id="section-1.1">
         <h3 id="name-conventions-and-definitions">
@@ -1318,6 +1344,12 @@ efficiency (CPU used in processing)<a href="#section-1-7.1.1" class="pilcrow">¶
 described in BCP 14 <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <p id="section-1.1-2">Terms and definitions from <span>[<a href="#STD94" class="cite xref">STD94</a>]</span>, <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span>, and <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> apply.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">The somewhat stilted term "floating point datum" from <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> (a
+superset of "floating point number") is usually expressed as "floating
+point value" .
+(Note that <a href="#RFC8949" class="auto internal xref">RFC8949</a> is not always very precise in this, using the
+term "floating point number" almost as a synonym for "floating point
+value".)<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1343,34 +1375,41 @@ appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">�
 </li>
       </ul>
 <p id="section-2-3">The latter two forms are often called "bignums" for historical
-reasons, the former "basic" integers.  The Concise Data Definition
+reasons, contrasting them to the former "basic" integers; we'll try to
+avoid the term as it can be confused with platform-specific types such
+as BigInt in JavaScript.
+The Concise Data Definition
 Language (CDDL) <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span> has the types <code>uint</code>,
 <code>nint</code>, and <code>int</code>, for the ranges of values covered by major type 0,
 major type 1, and either of them, respectively; <code>biguint</code>, <code>bignint</code>,
 and <code>bigint</code> for the range of value covered by tag 2, tag3, and either;
 and <code>unsigned</code> and <code>integer</code> for a choice of either form (but
 interestingly no <code>negative</code>).
+
 As the preferred encoding for an integer chooses between major type
 0/1 and tag 2/3 automatically, in practice <code>biguint</code> and <code>unsigned</code>
 are the same type, as are <code>bigint</code> and <code>integer</code>.<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">The Major type 0 numbers come in five different encoding sizes, as
+<p id="section-2-4">Applications that want to constrain the ranges of numbers in a way
+less dependent on CBOR serialization specifics can find useful CDDL
+number and number range definitions in <span>[<a href="#USEFUL-CDDL" class="cite xref">USEFUL-CDDL</a>]</span>.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">The Major type 0 numbers come in five different encoding sizes, as
 indicated by their initial byte:
 immediate ("1+0") encoding (0..23), one-byte ("1+1") (0..255),
 two-byte ("1+2", 0..65535), four-byte, and eight-byte.
 The Preferred Serialization always uses the shortest of the major type
 0 encodings
 available for an unsigned integer.
-The intention is that there is no semantic difference between the
-major type 0 encodings, and there also is no semantic difference between major type 0 and
-tag 2.
+The intention is that there is no semantic difference between the different
+major type 0 encodings of the same value, and there also is no
+semantic difference between major type 0 and tag 2.
 This means that Preferred Serialization always uses major type 0
 over tag 2 when possible, and the shortest encoding of these (and thus no leading
 zero bytes for the tagged encodings).
-Major type 1 and tag 3 are analogous.<a href="#section-2-4" class="pilcrow">¶</a></p>
-<p id="section-2-5">Note that there is no "signed type" in CBOR: as any specific number to
+Major type 1 and tag 3 are analogous.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-6">Note that there is no "signed type" in CBOR: as any specific number to
 be represented is either negative or not, it is represented as an
 unsigned integer or as a negative integer.
-Major type 0 unsigned integers cover exactly the range of platform
+Major type 0 unsigned integers cover exactly the range of widely used platform
 types such as <code>uint64_t</code> or <code>u64</code>.
 Signed platform types such as <code>int64_t</code> or <code>i64</code> can be represented in
 the lower half of the unsigned space and the upper half of the
@@ -1378,19 +1417,19 @@ negative space.
 Platforms typically have no <code>nint64_t</code> type that could take all
 negative numbers representable in major type 1; generic decoders will
 therefore treat the lower half of the negative space in the same way
-they will treat bignums that do not fit the signed platform type.
+they will treat tag 2/3 values that do not fit the signed platform type.
 Similarly, generic encoders for a platform with <code>u128</code>/<code>i128</code> types
 will choose between major type 0/1 and tag 2/3 just like they would
-choose between the encoding sizes inside major type 0/1.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<p id="section-2-6">While additional representation of integers could be developed, the
+choose between the encoding sizes inside major type 0/1.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-7">While additional representation of integers could be developed, the
 options already provided by <span>[<a href="#STD94" class="cite xref">STD94</a>]</span> should be able to satisfy most
-applications.<a href="#section-2-6" class="pilcrow">¶</a></p>
+applications.<a href="#section-2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-ieee">
 <section id="section-3">
-      <h2 id="name-ieee-754-floating-point-num">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-ieee-754-floating-point-num" class="section-name selfRef">IEEE 754 Floating Point Numbers</a>
+      <h2 id="name-ieee-754-floating-point-val">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-ieee-754-floating-point-val" class="section-name selfRef">IEEE 754 Floating Point Values</a>
       </h2>
 <p id="section-3-1">While integer numbers are relatively easy to represent, floating point
 numbers as a realization of rational or real numbers are a much more
@@ -1404,7 +1443,7 @@ IEEE 754).
 This standard is widely adopted in hardware and software, offering
 choices such as binary vs. decimal floating point numbers, and
 different representation sizes.
-Out of the large choice available, CBOR directly supports the three
+Out of the large choice available, CBOR directly uses the three
 formats binary16, binary32, and binary64, i.e., the signed binary
 floating point formats in 16, 32, and 64 bits, colloquially known as
 half (16 bits), single (32 bits), and double (64 bits) precision.
@@ -1439,7 +1478,10 @@ approaches for intermingling them in this document.<a href="#section-3.1-3" clas
         <h3 id="name-considerations-for-non-fini">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-considerations-for-non-fini" class="section-name selfRef">Considerations for non-finite numbers and non-numbers</a>
         </h3>
-<p id="section-3.2-1">IEEE754 distinguishes three kinds of floating point data item:<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">IEEE754 distinguishes three sets of floating point data item (termed
+<em>floating point datum</em> in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>, also simply called <em>floating
+point value</em> in CBOR-related documents), not
+all of which are termed <em>floating point numbers</em>:<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2-2.1">
             <p id="section-3.2-2.1.1">finite floating-point number: A finite number that is representable
@@ -1458,7 +1500,7 @@ point operation such as 1.0/0.0 (positive infinity) or −1.0/0.0
 </li>
           <li class="normal" id="section-3.2-2.3">
             <p id="section-3.2-2.3.1">NaN: a <em>floating point datum</em> that is not a number (NaN), used to
-represent computations that didn't lead to a numeric result, not
+represent computations that did not lead to a numeric result, not
 even an infinity.
 A commonly implemented example for such a computation is 0.0/0.0.
 The formats provide a way to include additional information with a
@@ -1475,36 +1517,40 @@ only recently has been standardized as part of std::strong_order in
 C++20 <span>[<a href="#Cplusplus20" class="cite xref">Cplusplus20</a>]</span>.)<a href="#section-3.2-2.3.2" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-3.2-3">Not all platforms that can use IEEE 754 do provide all these kinds, e.g.,
+<p id="section-3.2-3">Not all platforms that can use IEEE 754 do provide all these sets (or
+all elements of all sets), e.g.,
 Erlang only provides finite floating-point numbers.
 Platforms that do provide them widely vary in the way they provide
 access to non-finite numbers and NaNs beyond the floating point
 operations given above.
 Usually there is an operation such as <code>isnan()</code> in C, which is needed
-as comparison to a NaN always yields inequality.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+as comparison of any floating point value (including NaNs) to a NaN
+always yields inequality.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <div id="protocol-design-considerations">
 <section id="section-3.2.1">
           <h4 id="name-protocol-design-considerati">
 <a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-protocol-design-considerati" class="section-name selfRef">Protocol Design Considerations</a>
           </h4>
-<p id="section-3.2.1-1">CBOR supports the interchange of all kinds of IEEE 754 data items,
-including non-finite numbers and non-numbers (NaNs).
-For an application developer that is already using IEEE 754 floating
+<p id="section-3.2.1-1">CBOR does not attempt to invent a new floating point architecture, but
+adopts the architecture defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> in a whole-sale fashion.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">CBOR supports the interchange of all kinds of IEEE 754 data items,
+including non-finite numbers and non-numbers (NaNs).<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-3">For an application developer that is already using IEEE 754 floating
 point, there is little additional consideration required:
 Both infinities and NaN are widely supported in IEEE-754 hardware and
 software by CPUs, OS’s and programming environments.
 CBOR protocol designs can generally rely on infinities and NaN as a
 concept being supported, but implementations may run into dark corners
 of their platforms when it comes to distinguishing and preserving NaN
-information in NaN values.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.2.1-2">However, for a protocol that wants to achieve good interoperability
+information in NaN values.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-4">However, for a protocol that wants to achieve good interoperability
 over a wide variety of platforms, the fact that platforms differ in
 their support of non-finite numbers and NaNs becomes relevant.
 (See <a href="#implcons" class="auto internal xref">Section 3.2.2</a> below for reasons for such differences.)
 Protocol designs aiming for the widest possible platform support may
 want to implement replacements for infinite numbers and NaNs, or at
 least not rely on NaN information being successfully preserved during
-interchange.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+interchange.<a href="#section-3.2.1-4" class="pilcrow">¶</a></p>
 <div id="use-cases-for-full-support-of-nan-values">
 <section id="section-3.2.1.1">
             <h5 id="name-use-cases-for-full-support-">
@@ -1673,16 +1719,35 @@ bits were all zero.<a href="#section-3.2.2-7.2.2.3.1" class="pilcrow">¶</a></p>
           </ul>
 <p id="section-3.2.2-8">If the contraction is optional, e.g., for Preferred Serialization, do
 not perform the contraction if the removed bits in the significand
-truncation aren't all zero.
+truncation are not all zero.
 If the contraction is required to fit into limited platform types
 (e.g., binary32 only), a failed truncation check indicates the loss of
 information and should be signaled to the application.
 We say a contraction "preserves the NaN information" if subsequent
 expansion to the original size format recreates the exact same NaN value.<a href="#section-3.2.2-8" class="pilcrow">¶</a></p>
-<p id="section-3.2.2-9"><a href="#app-nan" class="auto internal xref">Appendix A.1</a> gives additional detailed considerations for implementations
+<p id="section-3.2.2-9"><a href="#app-nan" class="auto internal xref">Appendix B.1</a> gives additional detailed considerations for implementations
 that aspire to provide full support for NaNs, preserving NaN information.<a href="#section-3.2.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
+</section>
+</div>
+<div id="getting-by-without-platform-support-for-floating-point-values">
+<section id="section-3.3">
+        <h3 id="name-getting-by-without-platform">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-getting-by-without-platform" class="section-name selfRef">Getting by without Platform Support for Floating Point Values</a>
+        </h3>
+<p id="section-3.3-1">On a constrained platform, CPU instructions and library functions for
+IEEE 754 floating point values may not be available.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">A partial implementation for constrained systems may want to restrict
+the application data models supported to those without floating point
+numbers.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">However, IETF standards often use timestamps, which are
+efficiently supported by CBOR Tag 1.
+Tag 1 offers a choice between integer and floating point representations;
+only the latter are capable of resolutions of better than 1 second.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4"><a href="#fixed-point" class="auto internal xref">Appendix A</a> shows how to support a useful subrange of Tag 1 time
+stamps that are encoded as floating point numbers for interchange, but
+processed as 32.32 bit fixed point numbers in a constrained implementation.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1699,7 +1764,7 @@ These tags are very flexible, but this flexibility comes with a choice
 of ways they could be integrated into a generic encoder.
 Because of this flexibility, tags 4 and 5 do not define a Preferred
 Serialization or a deterministic encoding.<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2"><span><a href="https://rfc-editor.org/rfc/rfc9581#section-3.2" class="relref">Section 3.2</a> of [<a href="#RFC9581" class="cite xref">RFC9581</a>]</span> uses representations derived
+<p id="section-4-2"><span><a href="https://rfc-editor.org/rfc/rfc9581#section-3.2" class="relref">Section 3.2</a> of [<a href="#RFC9581" class="cite xref">RFC9581</a>]</span> can use representations derived
 from the tags 4 and 5 to represent timestamps.
 <span><a href="https://rfc-editor.org/rfc/rfc9581#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9581" class="cite xref">RFC9581</a>]</span> lists various other tags that
 can be used for representing numbers for advanced arithmetic,
@@ -1817,33 +1882,98 @@ This revision of the standard is widely known as C23. Technically equivalent spe
 <dd class="break"></dd>
 <dt id="I-D.ietf-cbor-cde">[I-D.ietf-cbor-cde]</dt>
         <dd>
-<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Common Deterministic Encoding (CDE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-cde-11</span>, <time datetime="2025-05-12" class="refDate">12 May 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-11">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-11</a>&gt;</span>. </dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"CBOR Common Deterministic Encoding (CDE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-cbor-cde-13</span>, <time datetime="2025-10-13" class="refDate">13 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-13">https://datatracker.ietf.org/doc/html/draft-ietf-cbor-cde-13</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.mcnally-deterministic-cbor">[I-D.mcnally-deterministic-cbor]</dt>
+        <dd>
+<span class="refAuthor">McNally, W.</span>, <span class="refAuthor">Allen, C.</span>, <span class="refAuthor">Bormann, C.</span>, and <span class="refAuthor">L. Lundblade</span>, <span class="refTitle">"dCBOR: Deterministic CBOR"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mcnally-deterministic-cbor-17</span>, <time datetime="2026-02-11" class="refDate">11 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-17">https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-17</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="USEFUL-CDDL">[USEFUL-CDDL]</dt>
       <dd>
-<span class="refAuthor">McNally, W.</span>, <span class="refAuthor">Allen, C.</span>, <span class="refAuthor">Bormann, C.</span>, and <span class="refAuthor">L. Lundblade</span>, <span class="refTitle">"dCBOR: A Deterministic CBOR Application Profile"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mcnally-deterministic-cbor-12</span>, <time datetime="2025-02-07" class="refDate">7 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-12">https://datatracker.ietf.org/doc/html/draft-mcnally-deterministic-cbor-12</a>&gt;</span>. </dd>
+<span class="refTitle">"Useful CDDL"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/cbor-wg/cddl/wiki/Useful-CDDL#number-ranges">https://github.com/cbor-wg/cddl/wiki/Useful-CDDL#number-ranges</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
 </div>
 </section>
 </div>
-<div id="impcheck">
+<div id="fixed-point">
 <section id="appendix-A">
-      <h2 id="name-implementers-checklists-for">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-implementers-checklists-for" class="section-name selfRef">Implementers' Checklists for Floating Point Values</a>
+      <h2 id="name-3232-bit-fixed-point-for-su">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-3232-bit-fixed-point-for-su" class="section-name selfRef">32.32 Bit Fixed Point for Supporting Precision Tag 1 Timestamps</a>
       </h2>
-<p id="appendix-A-1">This check list employs <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> keywords to indicate interoperability
-requirements on implementations.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<p id="appendix-A-2">The following considerations apply to encoding (emitting) floating
-point values in a generic encoder:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">This appendix shows how to decode into and encode from a 32.32-bit
+internal fixed point representation of floating point Tag 1 time
+stamps, limited to a range from February 2004 to January 2106
+inclusive.
+The fixed point representation is a 64-bit unsigned integer, the most
+significant half (<code>fp &gt;&gt; 32</code>) of which used as a 32-bit unsigned
+integer gives the timestamp rounded down to full seconds, and the
+least significant half of which (<code>fp &amp; 0xffffffff</code>) contains a
+fractional part of the timestamp to a resolution of 2<sup><code>-32</code></sup>
+seconds (fractions of a nanosecond, more resolution than the
+approximately microseconds that Tag 1 actually can deliver in this
+range of timestamps).<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The C functions given below return a 32.32-bit fixed point value as a
+64-bit unsigned integer if the timestamp is covered in the above range, 0 otherwise.
+b64/b32 are the binary64/binary32 floating point values represented as an
+unsigned long (i.e., the CBOR argument value).<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<span id="name-converting-a-float64-timest"></span><div id="float64-to-fixed3232">
+<figure id="figure-1">
+        <div class="lang-c sourcecode" id="appendix-A-3.1">
+<pre>
+unsigned long timestamp_float64_to_fixed3232(unsigned long b64) {
+  unsigned long exp = (b64 &gt;&gt; 52 &amp; 0xfffUL) - 0x41d;
+  if (exp &gt;= 2)
+    return 0;
+  return ((b64 &amp; 0xfffffffffffffUL)
+          + 0x10000000000000UL) &lt;&lt; (exp + 10);
+}
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-converting-a-float64-timest" class="selfRef">Converting a float64 timestamp to fixed point 32.32</a>
+        </figcaption></figure>
+</div>
+<p id="appendix-A-4">Because of preferred serialization, Tag 1 floating point timestamp
+values might arrive as a float32, so additional code is necessary for
+handling this rare case:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<span id="name-converting-a-float32-timest"></span><div id="float32-to-fixed3232">
+<figure id="figure-2">
+        <div class="lang-c sourcecode" id="appendix-A-5.1">
+<pre>
+unsigned long timestamp_float32_to_fixed3232(unsigned long b32) {
+  unsigned long exp = (b32 &gt;&gt; 23 &amp; 0x1ffUL) - 0x9d;
+  if (exp &gt;= 2)
+    return 0;
+  return ((b32 &amp; 0x7fffffUL) + 0x800000UL) &lt;&lt; (exp + 39);
+}
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-converting-a-float32-timest" class="selfRef">Converting a float32 timestamp to fixed point 32.32</a>
+        </figcaption></figure>
+</div>
+<p id="appendix-A-6">There is no value in the timestamp range supported by this simple code
+that would fit into a float16.<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="impcheck">
+<section id="appendix-B">
+      <h2 id="name-implementers-checklists-for">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-implementers-checklists-for" class="section-name selfRef">Implementers' Checklists for Floating Point Values</a>
+      </h2>
+<p id="appendix-B-1">This check list employs <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> keywords to indicate interoperability
+requirements on implementations.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The following considerations apply to encoding (emitting) floating
+point values in a generic encoder:<a href="#appendix-B-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-A-3.1">
-          <p id="appendix-A-3.1.1">The length of the argument is encoded in the lower 5 bits of the
+<li class="normal" id="appendix-B-3.1">
+          <p id="appendix-B-3.1.1">The length of the argument is encoded in the lower 5 bits of the
 first byte ("ai"), which indicates half precision (binary16, ai = 0x19),
 single precision (binary32, ai = 0x1a) and double precision
-(binary64, ai = 0x1b).<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
-<p id="appendix-A-3.1.2">
+(binary64, ai = 0x1b).<a href="#appendix-B-3.1.1" class="pilcrow">¶</a></p>
+<p id="appendix-B-3.1.2">
 For preferred serialization: if multiple of these encodings
 preserve the precision of the value to be encoded, only the
 shortest form of these <span class="bcp14">MUST</span> be emitted.
@@ -1851,16 +1981,16 @@ That implies that encoders <span class="bcp14">MUST</span> support half-precisio
 there is support for more than half precision on the platform)
 single-precision floating point.
 Positive and negative infinity and zero <span class="bcp14">MUST</span> be represented in
-half-precision floating point.<a href="#appendix-A-3.1.2" class="pilcrow">¶</a></p>
+half-precision floating point.<a href="#appendix-B-3.1.2" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-3.2">
-          <p id="appendix-A-3.2.1">NaNs <span class="bcp14">MUST</span> be supported, for all values of NaN information allowed
-in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
-<p id="appendix-A-3.2.2">
+        <li class="normal" id="appendix-B-3.2">
+          <p id="appendix-B-3.2.1">NaNs <span class="bcp14">MUST</span> be supported, for all values of NaN information allowed
+in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-B-3.2.1" class="pilcrow">¶</a></p>
+<p id="appendix-B-3.2.2">
 As with all floating point numbers, NaNs with payloads <span class="bcp14">MUST</span> be
 contracted to the shortest of double, single or half precision that
-preserves the NaN information.<a href="#appendix-A-3.2.2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3.2.3">
+preserves the NaN information.<a href="#appendix-B-3.2.2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3.2.3">
 The reduction is performed by removing the rightmost N bits of the
 payload, where N is the difference in the number of bits in the
 significand (mantissa) between the original format and the
@@ -1870,61 +2000,61 @@ rightmost bits removed are zero.
 (This will always reduce a double or single quiet NaN with an
 otherwise zero NaN payload, which is typically what is returned
 from an operation such as 0.0/0.0, to a half-precision quiet NaN
-encoded as 0xf9 7e00.)<a href="#appendix-A-3.2.3" class="pilcrow">¶</a></p>
+encoded as 0xf9 7e00.)<a href="#appendix-B-3.2.3" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-4">The following considerations apply to decoding (ingesting) floating
-point values in a generic decoder that supports IEEE 754 floating-point numbers:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">The following considerations apply to decoding (ingesting) floating
+point values in a generic decoder that supports IEEE 754 floating-point numbers:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-A-5.1">
-          <p id="appendix-A-5.1.1">Half-precision values <span class="bcp14">MUST</span> be accepted.<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-B-5.1">
+          <p id="appendix-B-5.1.1">Half-precision values <span class="bcp14">MUST</span> be accepted.<a href="#appendix-B-5.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-5.2">
-          <p id="appendix-A-5.2.1">Double- and single-precision values <span class="bcp14">SHOULD</span> be accepted; leaving these out
+        <li class="normal" id="appendix-B-5.2">
+          <p id="appendix-B-5.2.1">Double- and single-precision values <span class="bcp14">SHOULD</span> be accepted; leaving these out
 is only foreseen for decoders that need to work in exceptionally
-constrained environments.<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+constrained environments.<a href="#appendix-B-5.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-5.3">
-          <p id="appendix-A-5.3.1">If double-precision values are accepted, single-precision values
-<span class="bcp14">MUST</span> be accepted.<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-5.3">
+          <p id="appendix-B-5.3.1">If double-precision values are accepted, single-precision values
+<span class="bcp14">MUST</span> be accepted.<a href="#appendix-B-5.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="appendix-A-5.4">
-          <p id="appendix-A-5.4.1">NaNs, <span class="bcp14">MUST</span> be accepted, preserving the NaN information for use of
-the application.<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="appendix-B-5.4">
+          <p id="appendix-B-5.4.1">NaNs, <span class="bcp14">MUST</span> be accepted, preserving the NaN information for use of
+the application.<a href="#appendix-B-5.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <div id="app-nan">
-<section id="appendix-A.1">
+<section id="appendix-B.1">
         <h3 id="name-nan-payloads">
-<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-nan-payloads" class="section-name selfRef">NaN Payloads</a>
+<a href="#appendix-B.1" class="section-number selfRef">B.1. </a><a href="#name-nan-payloads" class="section-name selfRef">NaN Payloads</a>
         </h3>
-<p id="appendix-A.1-1">The basic data model of CBOR directly supports IEEE-754 data item of
+<p id="appendix-B.1-1">The basic data model of CBOR directly supports IEEE-754 data item of
 the forms binary16, binary32, and binary64.
 These have 10, 23, and 52 bits in the space provided for encoding the
 significand (see <a href="#tab-bits" class="auto internal xref">Table 1</a>).
 For a NaN, the first of these bits is used to indicate whether the NaN
 is signalling (0) or quiet (1).
 The up to 51 bits in the rest of the significand are called the "NAN
-payload".<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-2">The payload’s original purpose is diagnostic information to explain
+payload".<a href="#appendix-B.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.1-2">The payload’s original purpose is diagnostic information to explain
 why a NaN was generated by a local computation.
-There is no standard for the contents of a NaN payload.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-3">CBOR allows NaNs with non-zero payloads to be encoded.
+There is no standard for the contents of a NaN payload.<a href="#appendix-B.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.1-3">CBOR allows NaNs with non-zero payloads to be encoded.
 (Due to the way infinite numbers are encoded in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>,
-zero-payload NaN always must be quiet NaNs.)<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-4">As a result, if a protocol design does not use NaNs with non-zero
+zero-payload NaN always must be quiet NaNs.)<a href="#appendix-B.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.1-4">As a result, if a protocol design does not use NaNs with non-zero
 payloads and is using preferred serialization then NaN must be encoded
 as a half-precision with the quiet bit set and the payload set as 0,
 specifically 0xF97E00.
 If a design does not use NaNs with non-zero payloads and preferred
 serialization is not used, then the single and double precision quiet
-NaNs, 0xFA7FC00000 and 0xFB7FF0000000000000, may also be used.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+NaNs, 0xFA7FC00000 and 0xFB7FF0000000000000, may also be used.<a href="#appendix-B.1-4" class="pilcrow">¶</a></p>
 <div id="working-with-nans">
-<section id="appendix-A.1.1">
+<section id="appendix-B.1.1">
           <h4 id="name-working-with-nans">
-<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-working-with-nans" class="section-name selfRef">Working with NaNs</a>
+<a href="#appendix-B.1.1" class="section-number selfRef">B.1.1. </a><a href="#name-working-with-nans" class="section-name selfRef">Working with NaNs</a>
           </h4>
-<p id="appendix-A.1.1-1">NaN payloads have been in the IEEE-754 standard since 2008, but
+<p id="appendix-B.1.1-1">NaN payloads have been in the IEEE-754 standard since 2008, but
 programming environments often still do not provide facilities (e.g.,
 APIs) to make full use of them.
 In C there is the <code>isnan()</code> API to check if a value is a
@@ -1934,89 +2064,89 @@ For constructing a NaN with a payload, C for instance offers functions
 specific to a floating point type, such as <code>nanf()</code> for single
 precision (binary32) and <code>nan()</code> for double precision (binary64), or
 their analogues in the <code>strtof()</code> and <code>strtol()</code> functions.
-Section 7.24.1.5 and its Footnote 341 helpfully explain:<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
-<blockquote id="appendix-A.1.1-2">
-            <p id="appendix-A.1.1-2.1">[...] the meaning of the n-char sequence is
+Section 7.24.1.5 and its Footnote 341 helpfully explain:<a href="#appendix-B.1.1-1" class="pilcrow">¶</a></p>
+<blockquote id="appendix-B.1.1-2">
+            <p id="appendix-B.1.1-2.1">[...] the meaning of the n-char sequence is
 implementation-defined. [...]
 An implementation can use the
 n-char sequence to determine extra information to be represented in
-the NaN’s significand.<a href="#appendix-A.1.1-2.1" class="pilcrow">¶</a></p>
+the NaN’s significand.<a href="#appendix-B.1.1-2.1" class="pilcrow">¶</a></p>
 </blockquote>
-<p id="appendix-A.1.1-3">While Section 9.7 of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> now defines abstract APIs for creating and
+<p id="appendix-B.1.1-3">While Section 9.7 of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> now defines abstract APIs for creating and
 accessing NaN values (<code>getPayload</code>/<code>setPayload</code>), these definitions
 are partially implementation-defined and are vague enough that
-realizations of them have not made it into <span>[<a href="#C23" class="cite xref">C23</a>]</span>.<a href="#appendix-A.1.1-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-4">The typical way to work with a NaN payload in C instead is to
+realizations of them have not made it into <span>[<a href="#C23" class="cite xref">C23</a>]</span>.<a href="#appendix-B.1.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.1-4">The typical way to work with a NaN payload in C instead is to
 reinterpret the floating-point value as an unsigned integer and then
-use shifts and masks to unpack the IEEE-754 representation.<a href="#appendix-A.1.1-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.1-5">The floating point conversion (narrowing/widening) instructions of the
+use shifts and masks to unpack the IEEE-754 representation.<a href="#appendix-B.1.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.1-5">The floating point conversion (narrowing/widening) instructions of the
 most widely used CPU architectures cover NaNs in a comparable way as
 they convert finite numbers: They narrow by removing the right-most
 bits of the payload, and they widen by adding zero bits to the right.
 (E.g., for ARM A-profile Architecture <span>[<a href="#ARM" class="cite xref">ARM</a>]</span>:
-See Section J1.3.3.193 FPConvertNaN, page 14208 at the time of writing.)<a href="#appendix-A.1.1-5" class="pilcrow">¶</a></p>
+See Section J1.3.3.193 FPConvertNaN, page 14208 at the time of writing.)<a href="#appendix-B.1.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="nan-implementation-details">
-<section id="appendix-A.1.2">
+<section id="appendix-B.1.2">
           <h4 id="name-nan-implementation-details">
-<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-nan-implementation-details" class="section-name selfRef">NaN Implementation Details</a>
+<a href="#appendix-B.1.2" class="section-number selfRef">B.1.2. </a><a href="#name-nan-implementation-details" class="section-name selfRef">NaN Implementation Details</a>
           </h4>
-<p id="appendix-A.1.2-1">This section is primarily for CBOR library implementors.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-2">CBOR attempts to limit the MUSTs about CBOR implementations in order
+<p id="appendix-B.1.2-1">This section is primarily for CBOR library implementors.<a href="#appendix-B.1.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-2">CBOR attempts to limit the MUSTs about CBOR implementations in order
 to allow its use in a large variety of constrained use cases.
 For example, support for integers is not required because a protocol
 might need only strings.
 Similarly, there is no <span class="bcp14">MUST</span> that requires support of NaN and NaNs with
 non-zero payloads, but the recommendation here is that any generic
 CBOR library that supports floating-point support NaNs, preferably
-also with non-zero NaN payloads.<a href="#appendix-A.1.2-2" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-3">In most environments, there is little extra work to do to support NaN
+also with non-zero NaN payloads.<a href="#appendix-B.1.2-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-3">In most environments, there is little extra work to do to support NaN
 without payloads if floating-point is supported.
-NaNs will usually flow through as any other floating-point value.<a href="#appendix-A.1.2-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-4">Generic CBOR libraries are expected to support preferred serialization
+NaNs will usually flow through as any other floating-point value.<a href="#appendix-B.1.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-4">Generic CBOR libraries are expected to support preferred serialization
 of floating-point including NaNs.
 For NaNs with zero payloads, this requires reducing to a half-precision
 NaN without a payload.
 This requires a few explicit extra lines of code.
-See the sample half-precision implementation in Appendix D of RFC 8949.<a href="#appendix-A.1.2-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-5">The implementation of preferred serialization of NaN payloads needs a
+See the sample half-precision implementation in Appendix D of RFC 8949.<a href="#appendix-B.1.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-5">The implementation of preferred serialization of NaN payloads needs a
 few more additional lines.
 As with preferred serialization, NaN payloads must be reduced but only
 if they can be reduced without the loss of any non-zero payload bits.
 Programming platform provided floating-point hardware and software may
 or may not do this correctly for double to single conversion.
 The sample half-precision implementation in Appendix D of RFC 8949
-only supports NaNs without payloads.<a href="#appendix-A.1.2-5" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-6">A double precision NaN payload contains 51 bits, a single 22 bits and
+only supports NaNs without payloads.<a href="#appendix-B.1.2-5" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-6">A double precision NaN payload contains 51 bits, a single 22 bits and
 a half 9 bits, in each case all but the first bit of the significand.
 A double precision NaN can be reduced to a single precision NaN only if the right-most 29 payload bits are zero.
 A single precision NaN can be reduced to a half precision NaN only if the right-most 13 payload bits are zero.
 A double NaN can be reduced to a half precision NaN only if the right-most 42 payload bits are zero.
 Note that the exponent is always all-ones for NaN, so this is simpler
-than the equivalent contraction of regular, non-NAN, floating-point values.<a href="#appendix-A.1.2-6" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-7">To implement the above, most CBOR libraries will have to reinterpret
+than the equivalent contraction of regular, non-NAN, floating-point values.<a href="#appendix-B.1.2-6" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-7">To implement the above, most CBOR libraries will have to reinterpret
 the floating point value as an unsigned integer and use shifts and
-masks, based in the internal representation defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-A.1.2-7" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-8">Testing on some CPUs has shown them to do this correctly for conversion between single and double.
+masks, based in the internal representation defined in <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span>.<a href="#appendix-B.1.2-7" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-8">Testing on some CPUs has shown them to do this correctly for conversion between single and double.
 However, it may not be very useful to rely on platform libraries for the following reasons.
 First, they may provide no support at all for half-precision and half-precision is required for preferred serialization.
 Second, NaN payloads are a relatively recent and very specialist
-feature that is not usually used in interchange.<a href="#appendix-A.1.2-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.1.2-9">If platform implementation is relied upon, NaN payload reduction should be tested on each platform.
+feature that is not usually used in interchange.<a href="#appendix-B.1.2-8" class="pilcrow">¶</a></p>
+<p id="appendix-B.1.2-9">If platform implementation is relied upon, NaN payload reduction should be tested on each platform.
 Open source libraries intended to run on multiple platforms may be
-better off not relying on the platform.<a href="#appendix-A.1.2-9" class="pilcrow">¶</a></p>
+better off not relying on the platform.<a href="#appendix-B.1.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="nan-tests-examples">
-<section id="appendix-A.1.3">
+<section id="appendix-B.1.3">
           <h4 id="name-nan-tests-examples">
-<a href="#appendix-A.1.3" class="section-number selfRef">A.1.3. </a><a href="#name-nan-tests-examples" class="section-name selfRef">NaN Tests Examples</a>
+<a href="#appendix-B.1.3" class="section-number selfRef">B.1.3. </a><a href="#name-nan-tests-examples" class="section-name selfRef">NaN Tests Examples</a>
           </h4>
-<p id="appendix-A.1.3-1">The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
+<p id="appendix-B.1.3-1">The IEEE-754 numbers are given as a 64-bit (binary64) or 32-bit
 (binary32) unsigned integer in hex to show the bits that make up the
 floating-point value.
-All of the following are NaNs.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a></p>
+All of the following are NaNs.<a href="#appendix-B.1.3-1" class="pilcrow">¶</a></p>
 <span id="name-examples-for-preferred-seri"></span><div id="nan-examples">
 <table class="center" id="table-2">
             <caption>
@@ -2090,30 +2220,57 @@ All of the following are NaNs.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
+<div id="list-of-figures">
+<section id="appendix-C">
+      <h2 id="name-list-of-figures">
+<a href="#name-list-of-figures" class="section-name selfRef">List of Figures</a>
+      </h2>
+<span class="break"></span><dl class="dlCompact dlParallel" id="appendix-C-1">
+        <dt id="appendix-C-1.1">
+<a href="#float64-to-fixed3232" class="auto internal xref">Figure 1</a>:</dt>
+        <dd style="margin-left: 5.5em" id="appendix-C-1.2">
+          <p id="appendix-C-1.2.1"><a href="#float64-to-fixed3232" class="internal xref">Converting a float64 timestamp to fixed point 32.32</a><a href="#appendix-C-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="appendix-C-1.3">
+<a href="#float32-to-fixed3232" class="auto internal xref">Figure 2</a>:</dt>
+        <dd style="margin-left: 5.5em" id="appendix-C-1.4">
+          <p id="appendix-C-1.4.1"><a href="#float32-to-fixed3232" class="internal xref">Converting a float32 timestamp to fixed point 32.32</a><a href="#appendix-C-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
 <div id="list-of-tables">
-<section id="appendix-B">
+<section id="appendix-D">
       <h2 id="name-list-of-tables">
 <a href="#name-list-of-tables" class="section-name selfRef">List of Tables</a>
       </h2>
-<ol start="1" type="1" class="compact type-1" id="appendix-B-1">
-<li id="appendix-B-1.1">
-          <p id="appendix-B-1.1.1"><span><a href="#tab-bits" class="internal xref">Bit Allocation in Floating Point Formats</a> (<a href="#tab-bits" class="auto internal xref">Table 1</a>)</span><a href="#appendix-B-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="appendix-B-1.2">
-          <p id="appendix-B-1.2.1"><span><a href="#nan-examples" class="internal xref">Examples for Preferred Serialization of NaN values</a> (<a href="#nan-examples" class="auto internal xref">Table 2</a>)</span><a href="#appendix-B-1.2.1" class="pilcrow">¶</a></p>
-</li>
-      </ol>
+<span class="break"></span><dl class="dlCompact dlParallel" id="appendix-D-1">
+        <dt id="appendix-D-1.1">
+<a href="#tab-bits" class="auto internal xref">Table 1</a>:</dt>
+        <dd style="margin-left: 5.5em" id="appendix-D-1.2">
+          <p id="appendix-D-1.2.1"><a href="#tab-bits" class="internal xref">Bit Allocation in Floating Point Formats</a><a href="#appendix-D-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="appendix-D-1.3">
+<a href="#nan-examples" class="auto internal xref">Table 2</a>:</dt>
+        <dd style="margin-left: 5.5em" id="appendix-D-1.4">
+          <p id="appendix-D-1.4.1"><a href="#nan-examples" class="internal xref">Examples for Preferred Serialization of NaN values</a><a href="#appendix-D-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="appendix-C">
+<section id="appendix-E">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
     </h2>
 </section>
 </div>
 <div id="contributors">
-<section id="appendix-D">
+<section id="appendix-F">
       <h2 id="name-contributors">
 <a href="#name-contributors" class="section-name selfRef">Contributors</a>
       </h2>
@@ -2125,11 +2282,11 @@ All of the following are NaNs.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a>
 <a href="mailto:lgl@securitytheory.com" class="email">lgl@securitytheory.com</a>
 </div>
 </address>
-<p id="appendix-D-1">Laurence wrote much of the initial text about NaN processing.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+<p id="appendix-F-1">Laurence wrote much of the initial text about NaN processing.<a href="#appendix-F-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-E">
+<section id="appendix-G">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
