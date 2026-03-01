@@ -1,7 +1,22 @@
 
+# List of Figures
+{:unnumbered}
+
+{:compact hangindent="11"}
+{{float64-to-fixed3232}}:
+: {{<<float64-to-fixed3232}}
+
+{{float32-to-fixed3232}}:
+: {{<<float32-to-fixed3232}}
+
+
 # List of Tables
 {:unnumbered}
 
-{:compact}
-1. [Bit Allocation in Floating Point Formats](#tab-bits)
-2. [Examples for Preferred Serialization of NaN values](#nan-examples)
+{:compact hangindent="11"}
+{{tab-bits}}:
+: {{<<tab-bits}}
+
+{{nan-examples}}:
+: {{<<nan-examples}}
+

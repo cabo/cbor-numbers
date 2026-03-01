@@ -99,7 +99,9 @@ informative:
     author:
       org: Arm Limited
     date: 30 April 2025
-
+  USEFUL-CDDL:
+    title: Useful CDDL
+    target: https://github.com/cbor-wg/cddl/wiki/Useful-CDDL#number-ranges
 
 --- abstract
 
@@ -115,9 +117,9 @@ informative:
 
     Among the kinds of data that a data representation format needs to be
     able to carry, numbers have a prominent role, but also have
-    inherent complexity that needs attention from protocol designers
-    and implementers of CBOR
-    libraries and of the applications that use them.
+    inherent complexity that needs attention from protocol designers,
+    from implementers of CBOR
+    libraries, and from implementers of the applications that use them.
 
     This document gives an overview over number formats available in
     CBOR and some notable CBOR tags registered, and it attempts to
@@ -126,7 +128,7 @@ informative:
 
 [^disclaimer]
 
-[^disclaimer]: This is a rather drafty initial revision, pieced
+[^disclaimer]: This is still rather drafty, pieced
     together from various components, so it has a higher level of
     redundancy than ultimately desired.
 
@@ -153,11 +155,35 @@ These sections will generally address considerations such as:
 * Use by applications
 * Interoperability considerations, potential "dark corners"
 
+CBOR defines an interchange format for various kinds of number-like data
+items, some right in {{STD94}}, some via the definition of additional
+tags (see also {{sec-float}}).
+Implementations on a specific platform will want to map the
+transferred data items into the data types available on the platform
+or new data types defined by the CBOR implementation.
+The ranges of the various formats provided for numbers in the interchange format are
+not always congruent with the platform types of a specific platform,
+so some design effort may be required to define a platform-specific API.
+Apart from a relatively strong dividing line between integer and
+floating point data items, the interchanged data items make no
+statement on which platform-specific type should be used to ingest the
+item into.
+Designers of CBOR-based protocols can decide to define their application
+data types with a view to platform types that are likely to be
+available on the target platforms.
+
 ## Conventions and Definitions
 
 {::boilerplate bcp14-tagged-bcp}
 
 Terms and definitions from {{-cbor}}, {{-cddl}}, and {{IEEE754}} apply.
+
+The somewhat stilted term "floating point datum" from {{IEEE754}} (a
+superset of "floating point number") is usually expressed as "floating
+point value" .
+(Note that {{RFC8949}} is not always very precise in this, using the
+term "floating point number" almost as a synonym for "floating point
+value".)
 
 # Integer Numbers {#sec-int}
 
@@ -169,16 +195,24 @@ CBOR provides representations of integer numbers in unsigned and negative forms:
 * Negative integers with no size limitations, tag 3 on a byte string
 
 The latter two forms are often called "bignums" for historical
-reasons, the former "basic" integers.  The Concise Data Definition
+reasons, contrasting them to the former "basic" integers; we'll try to
+avoid the term as it can be confused with platform-specific types such
+as BigInt in JavaScript.
+The Concise Data Definition
 Language (CDDL) {{-cddl}} has the types `uint`,
 `nint`, and `int`, for the ranges of values covered by major type 0,
 major type 1, and either of them, respectively; `biguint`, `bignint`,
 and `bigint` for the range of value covered by tag 2, tag3, and either;
 and `unsigned` and `integer` for a choice of either form (but
 interestingly no `negative`).
+<!-- XXX equivalence -->
 As the preferred encoding for an integer chooses between major type
 0/1 and tag 2/3 automatically, in practice `biguint` and `unsigned`
 are the same type, as are `bigint` and `integer`.
+
+Applications that want to constrain the ranges of numbers in a way
+less dependent on CBOR serialization specifics can find useful CDDL
+number and number range definitions in [USEFUL-CDDL].
 
 The Major type 0 numbers come in five different encoding sizes, as
 indicated by their initial byte:
@@ -187,9 +221,9 @@ two-byte ("1+2", 0..65535), four-byte, and eight-byte.
 The Preferred Serialization always uses the shortest of the major type
 0 encodings
 available for an unsigned integer.
-The intention is that there is no semantic difference between the
-major type 0 encodings, and there also is no semantic difference between major type 0 and
-tag 2.
+The intention is that there is no semantic difference between the different
+major type 0 encodings of the same value, and there also is no
+semantic difference between major type 0 and tag 2.
 This means that Preferred Serialization always uses major type 0
 over tag 2 when possible, and the shortest encoding of these (and thus no leading
 zero bytes for the tagged encodings).
@@ -198,7 +232,7 @@ Major type 1 and tag 3 are analogous.
 Note that there is no "signed type" in CBOR: as any specific number to
 be represented is either negative or not, it is represented as an
 unsigned integer or as a negative integer.
-Major type 0 unsigned integers cover exactly the range of platform
+Major type 0 unsigned integers cover exactly the range of widely used platform
 types such as `uint64_t` or `u64`.
 Signed platform types such as `int64_t` or `i64` can be represented in
 the lower half of the unsigned space and the upper half of the
@@ -206,7 +240,7 @@ negative space.
 Platforms typically have no `nint64_t` type that could take all
 negative numbers representable in major type 1; generic decoders will
 therefore treat the lower half of the negative space in the same way
-they will treat bignums that do not fit the signed platform type.
+they will treat tag 2/3 values that do not fit the signed platform type.
 Similarly, generic encoders for a platform with `u128`/`i128` types
 will choose between major type 0/1 and tag 2/3 just like they would
 choose between the encoding sizes inside major type 0/1.
@@ -215,7 +249,7 @@ While additional representation of integers could be developed, the
 options already provided by {{-cbor}} should be able to satisfy most
 applications.
 
-# IEEE 754 Floating Point Numbers {#sec-ieee}
+# IEEE 754 Floating Point Values {#sec-ieee}
 
 While integer numbers are relatively easy to represent, floating point
 numbers as a realization of rational or real numbers are a much more
@@ -230,7 +264,7 @@ IEEE 754).
 This standard is widely adopted in hardware and software, offering
 choices such as binary vs. decimal floating point numbers, and
 different representation sizes.
-Out of the large choice available, CBOR directly supports the three
+Out of the large choice available, CBOR directly uses the three
 formats binary16, binary32, and binary64, i.e., the signed binary
 floating point formats in 16, 32, and 64 bits, colloquially known as
 half (16 bits), single (32 bits), and double (64 bits) precision.
@@ -262,7 +296,10 @@ approaches for intermingling them in this document.
 
 ## Considerations for non-finite numbers and non-numbers
 
-IEEE754 distinguishes three kinds of floating point data item:
+IEEE754 distinguishes three sets of floating point data item (termed
+_floating point datum_ in {{IEEE754}}, also simply called _floating
+point value_ in CBOR-related documents), not
+all of which are termed *floating point numbers*:
 
 * finite floating-point number: A finite number that is representable
   in a floating-point format.  Note that these further divide into
@@ -276,7 +313,7 @@ IEEE754 distinguishes three kinds of floating point data item:
   point operation such as 1.0/0.0 (positive infinity) or −1.0/0.0
   (negative infinity); they react to comparisons as one would expect.
 * NaN: a _floating point datum_ that is not a number (NaN), used to
-  represent computations that didn't lead to a numeric result, not
+  represent computations that did not lead to a numeric result, not
   even an infinity.
   A commonly implemented example for such a computation is 0.0/0.0.
   The formats provide a way to include additional information with a
@@ -292,18 +329,24 @@ IEEE754 distinguishes three kinds of floating point data item:
   only recently has been standardized as part of std::strong_order in
   C++20 {{Cplusplus20}}.)
 
-Not all platforms that can use IEEE 754 do provide all these kinds, e.g.,
+Not all platforms that can use IEEE 754 do provide all these sets (or
+all elements of all sets), e.g.,
 Erlang only provides finite floating-point numbers.
 Platforms that do provide them widely vary in the way they provide
 access to non-finite numbers and NaNs beyond the floating point
 operations given above.
 Usually there is an operation such as `isnan()` in C, which is needed
-as comparison to a NaN always yields inequality.
+as comparison of any floating point value (including NaNs) to a NaN
+always yields inequality.
 
 ### Protocol Design Considerations
 
+CBOR does not attempt to invent a new floating point architecture, but
+adopts the architecture defined in {{IEEE754}} in a whole-sale fashion.
+
 CBOR supports the interchange of all kinds of IEEE 754 data items,
 including non-finite numbers and non-numbers (NaNs).
+
 For an application developer that is already using IEEE 754 floating
 point, there is little additional consideration required:
 Both infinities and NaN are widely supported in IEEE-754 hardware and
@@ -428,7 +471,7 @@ these formats is best done by operating on the bit patterns of the
 
 If the contraction is optional, e.g., for Preferred Serialization, do
 not perform the contraction if the removed bits in the significand
-truncation aren't all zero.
+truncation are not all zero.
 If the contraction is required to fit into limited platform types
 (e.g., binary32 only), a failed truncation check indicates the loss of
 information and should be signaled to the application.
@@ -438,6 +481,23 @@ expansion to the original size format recreates the exact same NaN value.
 {{app-nan}} gives additional detailed considerations for implementations
 that aspire to provide full support for NaNs, preserving NaN information.
 
+## Getting by without Platform Support for Floating Point Values
+
+On a constrained platform, CPU instructions and library functions for
+IEEE 754 floating point values may not be available.
+
+A partial implementation for constrained systems may want to restrict
+the application data models supported to those without floating point
+numbers.
+
+However, IETF standards often use timestamps, which are
+efficiently supported by CBOR Tag 1.
+Tag 1 offers a choice between integer and floating point representations;
+only the latter are capable of resolutions of better than 1 second.
+
+{{fixed-point}} shows how to support a useful subrange of Tag 1 time
+stamps that are encoded as floating point numbers for interchange, but
+processed as 32.32 bit fixed point numbers in a constrained implementation.
 
 # Other Floating Point Numbers {#sec-float}
 
@@ -449,7 +509,7 @@ of ways they could be integrated into a generic encoder.
 Because of this flexibility, tags 4 and 5 do not define a Preferred
 Serialization or a deterministic encoding.
 
-{{Section 3.2 of -time-tag}} uses representations derived
+{{Section 3.2 of -time-tag}} can use representations derived
 from the tags 4 and 5 to represent timestamps.
 {{Section 6.1 of -time-tag}} lists various other tags that
 can be used for representing numbers for advanced arithmetic,
@@ -484,6 +544,45 @@ RFC8949@-cbor}}.
 Add nan'' registration when that is ready)
 
 --- back
+
+# 32.32 Bit Fixed Point for Supporting Precision Tag 1 Timestamps {#fixed-point}
+
+This appendix shows how to decode into and encode from a 32.32-bit
+internal fixed point representation of floating point Tag 1 time
+stamps, limited to a range from February 2004 to January 2106
+inclusive.
+The fixed point representation is a 64-bit unsigned integer, the most
+significant half (`fp >> 32`) of which used as a 32-bit unsigned
+integer gives the timestamp rounded down to full seconds, and the
+least significant half of which (`fp & 0xffffffff`) contains a
+fractional part of the timestamp to a resolution of 2<sup>`-32`</sup>
+seconds (fractions of a nanosecond, more resolution than the
+approximately microseconds that Tag 1 actually can deliver in this
+range of timestamps).
+
+The C functions given below return a 32.32-bit fixed point value as a
+64-bit unsigned integer if the timestamp is covered in the above range, 0 otherwise.
+b64/b32 are the binary64/binary32 floating point values represented as an
+unsigned long (i.e., the CBOR argument value).
+
+~~~ c
+{::include fixed-point64.c}
+~~~
+{: #float64-to-fixed3232
+   title="Converting a float64 timestamp to fixed point 32.32"}
+
+Because of preferred serialization, Tag 1 floating point timestamp
+values might arrive as a float32, so additional code is necessary for
+handling this rare case:
+
+~~~ c
+{::include fixed-point32.c}
+~~~
+{: #float32-to-fixed3232
+   title="Converting a float32 timestamp to fixed point 32.32"}
+
+There is no value in the timestamp range supported by this simple code
+that would fit into a float16.
 
 # Implementers' Checklists for Floating Point Values {#impcheck}
 

@@ -15,6 +15,8 @@ else
 endif
 endif
 
+prep: lists.md
+
 lists.md: draft-bormann-cbor-numbers.xml
-	kramdown-rfc-extract-figures-tables $< >$@.new
+	kramdown-rfc-extract-figures-tables -trfc $< >$@.new
 	mv $@.new $@
